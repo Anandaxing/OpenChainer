@@ -141,7 +141,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 							onClick={() => cameraInputRef.current?.click()}
 							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 transition-colors min-h-[44px] min-w-[44px]"
 						>
-							📷 Mobile Camera
+							🏞️ Upload Your Picture
 						</button>
 						<button
 							type="button"
