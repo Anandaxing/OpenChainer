@@ -49,10 +49,10 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 		<div className="w-full space-y-4">
 			{/* Hero Headline */}
 			<div className="text-center sm:text-left space-y-1">
-				<h2 className="text-xl sm:text-2xl font-bold text-zinc-100 tracking-tight">
+				<h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
 					Analyze Circuit Schematics Instantly
 				</h2>
-				<p className="text-sm text-zinc-400">
+				<p className="text-sm text-zinc-600 dark:text-zinc-400">
 					Upload schematic diagrams, pinout blueprints, or PCB line art to
 					extract components & AC/DC maps.
 				</p>
@@ -80,7 +80,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 				className={`group relative rounded-xl border-2 border-dashed p-6 sm:p-10 text-center transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
 					isDragOver
 						? "border-emerald-500 bg-emerald-500/10"
-						: "border-zinc-800 bg-zinc-900/60 hover:border-emerald-500/50 hover:bg-zinc-900/90"
+						: "border-zinc-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 hover:border-emerald-500/50 hover:bg-white dark:hover:bg-zinc-900/90 shadow-sm dark:shadow-none"
 				}`}
 			>
 				<input
@@ -100,7 +100,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 				/>
 
 				<div className="flex flex-col items-center justify-center space-y-3">
-					<div className="w-14 h-14 rounded-full bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-transform">
+					<div className="w-14 h-14 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-transform">
 						<svg
 							className="w-7 h-7"
 							fill="none"
@@ -119,13 +119,13 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 					</div>
 
 					<div className="space-y-1">
-						<p className="text-base font-semibold text-zinc-200">
-							<span className="text-emerald-400 underline underline-offset-4 decoration-emerald-500/40">
+						<p className="text-base font-semibold text-zinc-800 dark:text-zinc-200">
+							<span className="text-emerald-600 dark:text-emerald-400 underline underline-offset-4 decoration-emerald-500/40">
 								Click to upload
 							</span>{" "}
 							or drag & drop
 						</p>
-						<p className="text-xs text-zinc-400">
+						<p className="text-xs text-zinc-500 dark:text-zinc-400">
 							PNG, JPG, WebP, SVG accepted (Maximum 4MB limit)
 						</p>
 					</div>
@@ -139,14 +139,14 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 						<button
 							type="button"
 							onClick={() => cameraInputRef.current?.click()}
-							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-800 text-zinc-200 border border-zinc-700 hover:bg-zinc-700 hover:text-white transition-colors min-h-[44px] min-w-[44px]"
+							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors min-h-[44px] min-w-[44px]"
 						>
-							🏞️ Upload Your Image
+							📷 Mobile Camera
 						</button>
 						<button
 							type="button"
 							onClick={() => onFileSelect(DUMMY_SAMPLE_SCHEMATIC_DATA_URL)}
-							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors min-h-[44px]"
+							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors min-h-[44px]"
 						>
 							⚡ Load Sample Schematic
 						</button>
@@ -155,12 +155,14 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 			</div>
 
 			{/* Privacy & Global Disclaimer */}
-			<div className="p-3 rounded-lg bg-zinc-900/40 border border-zinc-800/80 text-xs text-zinc-400 flex items-start gap-2">
-				<span className="text-amber-400 font-bold shrink-0">⚠</span>
+			<div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 text-xs text-zinc-600 dark:text-zinc-400 flex items-start gap-2">
+				<span className="text-amber-500 font-bold shrink-0">⚠</span>
 				<p>
-					<strong className="text-zinc-300">Disclaimer:</strong> AI-generated
-					analysis — verify before building; do not upload confidential or
-					proprietary circuit designs.
+					<strong className="text-zinc-800 dark:text-zinc-300">
+						Disclaimer:
+					</strong>{" "}
+					AI-generated analysis — verify before building; do not upload
+					confidential or proprietary circuit designs.
 				</p>
 			</div>
 		</div>

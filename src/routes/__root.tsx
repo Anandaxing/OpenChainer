@@ -1,6 +1,7 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { ThemeProvider } from "../context/ThemeContext";
 
 import appCss from "../styles.css?url";
 
@@ -13,10 +14,6 @@ export const Route = createRootRoute({
 			{
 				name: "viewport",
 				content: "width=device-width, initial-scale=1, maximum-scale=1",
-			},
-			{
-				name: "color-scheme",
-				content: "dark",
 			},
 			{
 				title: "OpenChainer — Circuit Schematic Analyzer",
@@ -52,7 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
-				{children}
+				<ThemeProvider>{children}</ThemeProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",
