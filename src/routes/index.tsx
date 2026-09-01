@@ -131,7 +131,7 @@ function DashboardPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pcb-grid-pattern transition-colors">
+		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pcb-grid-pattern transition-colors">
 			<Header />
 
 			{/* Main Single-Page Dashboard Container */}
@@ -185,7 +185,7 @@ function DashboardPage() {
 													<p className="text-xs font-semibold text-zinc-900 dark:text-zinc-200 truncate">
 														{filename}
 													</p>
-													<p className="text-[10px] font-mono text-zinc-500">
+													<p className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
 														Image Loaded
 													</p>
 												</div>
@@ -229,14 +229,14 @@ function DashboardPage() {
 									/>
 
 									{/* Dev Callout explicitly highlighting the dummy variable called */}
-									<div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-500 flex items-center justify-between shadow-sm dark:shadow-none">
+									<div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-400 flex items-center justify-between shadow-sm dark:shadow-none">
 										<span>
 											Active Data Source:{" "}
-											<code className="text-emerald-600 dark:text-emerald-400">
+											<code className="text-emerald-700 dark:text-emerald-400">
 												DUMMY_SCHEMATIC_ANALYSIS_RESULT
 											</code>
 										</span>
-										<span className="text-zinc-500 dark:text-zinc-600">
+										<span className="text-zinc-500 dark:text-zinc-500">
 											src/dummies/mockData.ts
 										</span>
 									</div>
@@ -260,7 +260,7 @@ function DashboardPage() {
 			</main>
 
 			{/* Global Footer */}
-			<footer className="border-t border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 py-4 text-center text-xs text-zinc-500 font-mono transition-colors">
+			<footer className="border-t border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400 font-mono transition-colors">
 				OpenChainer &copy; {new Date().getFullYear()} — Open Schematic Analysis
 				Workbench
 			</footer>

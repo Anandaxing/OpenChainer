@@ -16,9 +16,9 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
 	onChooseAnother,
 }) => {
 	return (
-		<div className="p-5 sm:p-6 rounded-xl bg-white dark:bg-zinc-900 border border-red-500/30 space-y-4 shadow-sm dark:shadow-none">
+		<div className="p-5 sm:p-6 rounded-xl bg-white dark:bg-zinc-900 border border-red-300 dark:border-red-500/30 space-y-4 shadow-sm dark:shadow-none">
 			<div className="flex items-start gap-3">
-				<div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-600 dark:text-red-400 font-bold shrink-0">
+				<div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 flex items-center justify-center text-red-600 dark:text-red-400 font-bold shrink-0">
 					{isNonSchematic ? "📷" : "⚠"}
 				</div>
 				<div className="space-y-1">
@@ -35,7 +35,7 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
 
 			{/* Actionable Tip Box */}
 			<div className="p-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800 space-y-1">
-				<div className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 uppercase flex items-center gap-1">
+				<div className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase flex items-center gap-1">
 					💡 Photo Tip / Recommended Action
 				</div>
 				<p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">

@@ -80,7 +80,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 				className={`group relative rounded-xl border-2 border-dashed p-6 sm:p-10 text-center transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/50 ${
 					isDragOver
 						? "border-emerald-500 bg-emerald-500/10"
-						: "border-zinc-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 hover:border-emerald-500/50 hover:bg-white dark:hover:bg-zinc-900/90 shadow-sm dark:shadow-none"
+						: "border-zinc-300 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-zinc-900/90 shadow-sm dark:shadow-none"
 				}`}
 			>
 				<input
@@ -119,7 +119,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 					</div>
 
 					<div className="space-y-1">
-						<p className="text-base font-semibold text-zinc-800 dark:text-zinc-200">
+						<p className="text-base font-semibold text-zinc-900 dark:text-zinc-200">
 							<span className="text-emerald-600 dark:text-emerald-400 underline underline-offset-4 decoration-emerald-500/40">
 								Click to upload
 							</span>{" "}
@@ -139,14 +139,14 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 						<button
 							type="button"
 							onClick={() => cameraInputRef.current?.click()}
-							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors min-h-[44px] min-w-[44px]"
+							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 transition-colors min-h-[44px] min-w-[44px]"
 						>
 							📷 Mobile Camera
 						</button>
 						<button
 							type="button"
 							onClick={() => onFileSelect(DUMMY_SAMPLE_SCHEMATIC_DATA_URL)}
-							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors min-h-[44px]"
+							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors min-h-[44px]"
 						>
 							⚡ Load Sample Schematic
 						</button>
@@ -155,7 +155,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 			</div>
 
 			{/* Privacy & Global Disclaimer */}
-			<div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 text-xs text-zinc-600 dark:text-zinc-400 flex items-start gap-2">
+			<div className="p-3 rounded-lg bg-zinc-100/80 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 text-xs text-zinc-600 dark:text-zinc-400 flex items-start gap-2">
 				<span className="text-amber-500 font-bold shrink-0">⚠</span>
 				<p>
 					<strong className="text-zinc-800 dark:text-zinc-300">

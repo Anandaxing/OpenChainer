@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind CSS v4 Custom Variant for class-based Dark Mode (.dark class on html/body) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --bg-workbench: #f8fafc;
@@ -34,17 +37,18 @@
   background-color: #f8fafc;
   background-image: 
     radial-gradient(#cbd5e1 1px, transparent 1px),
-    linear-gradient(to right, rgba(203, 213, 225, 0.5) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(203, 213, 225, 0.5) 1px, transparent 1px);
+    linear-gradient(to right, rgba(203, 213, 225, 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 213, 225, 0.6) 1px, transparent 1px);
   background-size: 24px 24px, 48px 48px, 48px 48px;
 }
 
-.dark .pcb-grid-pattern {
+.dark .pcb-grid-pattern,
+.dark.pcb-grid-pattern {
   background-color: #09090b;
   background-image: 
     radial-gradient(#18181b 1px, transparent 1px),
-    linear-gradient(to right, rgba(24, 24, 27, 0.5) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(24, 24, 27, 0.5) 1px, transparent 1px);
+    linear-gradient(to right, rgba(24, 24, 27, 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(24, 24, 27, 0.6) 1px, transparent 1px);
   background-size: 24px 24px, 48px 48px, 48px 48px;
 }
 

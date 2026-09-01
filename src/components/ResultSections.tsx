@@ -44,12 +44,12 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 							Schematic Analysis Report
 						</h2>
 						{result.isCached && (
-							<span className="px-2.5 py-0.5 text-[11px] font-mono font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-full flex items-center gap-1">
+							<span className="px-2.5 py-0.5 text-[11px] font-mono font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 rounded-full flex items-center gap-1">
 								⚡ Served from cache
 							</span>
 						)}
 					</div>
-					<p className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+					<p className="text-xs text-zinc-600 dark:text-zinc-400 font-mono">
 						ID: {result.id} · Analyzed{" "}
 						{new Date(result.analyzedAt).toLocaleTimeString()}
 					</p>
@@ -60,7 +60,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 						<button
 							type="button"
 							onClick={onChangeFile}
-							className="px-3 py-1.5 text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg transition-colors border border-zinc-300 dark:border-zinc-700 min-h-[44px]"
+							className="px-3 py-1.5 text-xs font-medium bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded-lg transition-colors border border-zinc-300 dark:border-zinc-700 min-h-[44px]"
 						>
 							Choose another
 						</button>
@@ -69,7 +69,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 						<button
 							type="button"
 							onClick={onReanalyze}
-							className="px-3 py-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/30 min-h-[44px]"
+							className="px-3 py-1.5 text-xs font-medium bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-300 dark:border-emerald-500/30 min-h-[44px]"
 						>
 							🔄 Reanalyze
 						</button>
@@ -79,7 +79,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 
 			{/* SECTION 1: Plain-language summary */}
 			<section className="p-4 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1.5 shadow-sm dark:shadow-none">
-				<h3 className="text-xs font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5">
+				<h3 className="text-xs font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1.5">
 					<span>📋</span> Circuit Overview
 				</h3>
 				<p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed font-normal">
@@ -89,7 +89,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 
 			{/* SECTION 2: Components list */}
 			<section className="space-y-2">
-				<h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold flex items-center gap-1.5">
+				<h3 className="text-xs font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400 font-bold flex items-center gap-1.5">
 					<span>🧩</span> Identified Components ({result.components.length})
 				</h3>
 				<div className="flex flex-wrap gap-2">
@@ -98,7 +98,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 							key={comp.designator}
 							className="px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-xs flex items-center gap-2 transition-colors shadow-sm dark:shadow-none"
 						>
-							<span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30">
+							<span className="font-mono font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-500/30">
 								{comp.designator}
 							</span>
 							<span className="text-zinc-800 dark:text-zinc-200 font-medium">
@@ -110,11 +110,11 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 			</section>
 
 			{/* SECTION 3: Power source */}
-			<section className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3 shadow-sm dark:shadow-none">
+			<section className="p-3.5 rounded-xl bg-zinc-100/70 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3 shadow-sm dark:shadow-none">
 				<div className="flex items-center gap-2.5">
 					<span className="text-lg">🔌</span>
 					<div>
-						<div className="text-xs font-mono text-zinc-500 dark:text-zinc-400 uppercase">
+						<div className="text-xs font-mono text-zinc-600 dark:text-zinc-400 uppercase">
 							Power Source Requirements
 						</div>
 						<div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -122,33 +122,33 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 						</div>
 					</div>
 				</div>
-				<div className="px-3 py-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+				<div className="px-3 py-1 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
 					{result.powerSource.voltage}
 				</div>
 			</section>
 
 			{/* SECTION 4: AC/DC map */}
 			<section className="space-y-2">
-				<h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold flex items-center gap-1.5">
+				<h3 className="text-xs font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400 font-bold flex items-center gap-1.5">
 					<span>⚡</span> AC / DC Domain Mapping
 				</h3>
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 					{/* Amber AC Card */}
-					<div className="p-3.5 rounded-xl bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/30 space-y-1">
-						<div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
+					<div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-500/30 space-y-1">
+						<div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-700 dark:text-amber-400">
 							<span>⚡</span> AC Domain Stage
 						</div>
-						<p className="text-xs text-amber-900 dark:text-amber-200/90 leading-relaxed font-sans">
+						<p className="text-xs text-amber-950 dark:text-amber-200/90 leading-relaxed font-sans">
 							{result.acDcMap.acDetails}
 						</p>
 					</div>
 
 					{/* Sky DC Card */}
-					<div className="p-3.5 rounded-xl bg-sky-500/10 dark:bg-sky-950/20 border border-sky-500/30 space-y-1">
-						<div className="flex items-center gap-1.5 text-xs font-mono font-bold text-sky-600 dark:text-sky-400">
+					<div className="p-3.5 rounded-xl bg-sky-50 dark:bg-sky-950/20 border border-sky-300 dark:border-sky-500/30 space-y-1">
+						<div className="flex items-center gap-1.5 text-xs font-mono font-bold text-sky-700 dark:text-sky-400">
 							<span>🔋</span> DC Domain Stage
 						</div>
-						<p className="text-xs text-sky-900 dark:text-sky-200/90 leading-relaxed font-sans">
+						<p className="text-xs text-sky-950 dark:text-sky-200/90 leading-relaxed font-sans">
 							{result.acDcMap.dcDetails}
 						</p>
 					</div>
@@ -157,21 +157,21 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 
 			{/* SECTION 5: Education detail */}
 			<section className="p-4 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-1.5 shadow-sm dark:shadow-none">
-				<h3 className="text-xs font-mono uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1.5">
+				<h3 className="text-xs font-mono uppercase tracking-wider text-indigo-700 dark:text-indigo-400 font-bold flex items-center gap-1.5">
 					<span>🎓</span> How This Circuit Operates
 				</h3>
-				<p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+				<p className="text-xs text-zinc-800 dark:text-zinc-300 leading-relaxed">
 					{result.educationDetail}
 				</p>
 			</section>
 
 			{/* SECTION 6: ⚠ "CHECK THIS" uncertainty list */}
-			<section className="p-4 rounded-xl bg-amber-500/10 dark:bg-amber-950/30 border-2 border-amber-500/50 space-y-2">
+			<section className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 dark:border-amber-500/50 space-y-2">
 				<div className="flex items-center justify-between">
-					<h3 className="text-xs font-mono uppercase tracking-wider text-amber-700 dark:text-amber-400 font-bold flex items-center gap-1.5">
+					<h3 className="text-xs font-mono uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold flex items-center gap-1.5">
 						<span>⚠</span> CHECK THIS — AI Verification Caveats
 					</h3>
-					<span className="text-[10px] font-mono bg-amber-500/20 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded font-semibold">
+					<span className="text-[10px] font-mono bg-amber-200 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 px-2 py-0.5 rounded font-semibold">
 						ALWAYS VISIBLE
 					</span>
 				</div>
@@ -179,9 +179,11 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 					{result.uncertainties.map((warning) => (
 						<li
 							key={warning.slice(0, 20)}
-							className="text-xs text-amber-900 dark:text-amber-200/90 flex items-start gap-2"
+							className="text-xs text-amber-950 dark:text-amber-200/90 flex items-start gap-2"
 						>
-							<span className="text-amber-500 font-bold shrink-0">•</span>
+							<span className="text-amber-600 dark:text-amber-500 font-bold shrink-0">
+								•
+							</span>
 							<span>{warning}</span>
 						</li>
 					))}
@@ -194,14 +196,14 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 					<button
 						type="button"
 						onClick={handleCopySummary}
-						className="px-3 py-2 rounded-lg bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 transition-colors min-h-[44px] shadow-sm dark:shadow-none"
+						className="px-3 py-2 rounded-lg bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 transition-colors min-h-[44px] shadow-sm dark:shadow-none"
 					>
 						{copied ? "✓ Copied!" : "📋 Copy Analysis"}
 					</button>
 					<button
 						type="button"
 						onClick={handleDownloadJson}
-						className="px-3 py-2 rounded-lg bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 transition-colors min-h-[44px] shadow-sm dark:shadow-none"
+						className="px-3 py-2 rounded-lg bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 transition-colors min-h-[44px] shadow-sm dark:shadow-none"
 					>
 						💾 Download JSON
 					</button>

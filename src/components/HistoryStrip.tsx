@@ -15,15 +15,15 @@ export const HistoryStrip: React.FC<HistoryStripProps> = ({
 	if (entries.length === 0) return null;
 
 	return (
-		<div className="space-y-2 pt-4 border-t border-zinc-200 dark:border-zinc-800/60">
-			<div className="flex items-center justify-between text-xs font-mono text-zinc-500 dark:text-zinc-400">
+		<div className="space-y-2 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
+			<div className="flex items-center justify-between text-xs font-mono text-zinc-600 dark:text-zinc-400">
 				<span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
 					<span>🕒</span> RECENT — this device ({entries.length}/10)
 				</span>
 				<button
 					type="button"
 					onClick={onClearHistory}
-					className="text-zinc-500 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 transition-colors text-[11px] underline underline-offset-2"
+					className="text-zinc-500 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 transition-colors text-[11px] underline underline-offset-2"
 				>
 					Clear history
 				</button>
@@ -44,7 +44,7 @@ export const HistoryStrip: React.FC<HistoryStripProps> = ({
 								alt={entry.filename}
 								className="w-full h-full object-cover group-hover:scale-105 transition-transform"
 							/>
-							<span className="absolute bottom-1 right-1 text-[9px] font-mono px-1 py-0.2 bg-white/90 dark:bg-zinc-950/80 text-emerald-600 dark:text-emerald-400 rounded">
+							<span className="absolute bottom-1 right-1 text-[9px] font-mono px-1 py-0.2 bg-white/90 dark:bg-zinc-950/80 text-emerald-700 dark:text-emerald-400 rounded border border-zinc-200 dark:border-zinc-800">
 								⚡ Cache
 							</span>
 						</div>
@@ -52,7 +52,7 @@ export const HistoryStrip: React.FC<HistoryStripProps> = ({
 							<p className="text-[11px] font-medium text-zinc-800 dark:text-zinc-200 truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
 								{entry.filename}
 							</p>
-							<p className="text-[9px] font-mono text-zinc-500">
+							<p className="text-[9px] font-mono text-zinc-500 dark:text-zinc-400">
 								{new Date(entry.analyzedAt).toLocaleDateString()}
 							</p>
 						</div>

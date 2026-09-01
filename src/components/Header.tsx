@@ -3,10 +3,10 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export const Header: React.FC = () => {
 	return (
-		<header className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur sticky top-0 z-40 px-4 py-3 transition-colors">
+		<header className="border-b border-zinc-200 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-950/80 backdrop-blur sticky top-0 z-40 px-4 py-3 transition-colors shadow-sm dark:shadow-none">
 			<div className="max-w-7xl mx-auto flex items-center justify-between">
 				<div className="flex items-center gap-3">
-					<div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold font-mono text-lg shadow-[0_0_12px_rgba(16,185,129,0.2)]">
+					<div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold font-mono text-lg shadow-[0_0_12px_rgba(16,185,129,0.15)]">
 						⚡
 					</div>
 					<div>
@@ -14,18 +14,18 @@ export const Header: React.FC = () => {
 							<h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
 								OpenChainer
 							</h1>
-							<span className="px-2 py-0.5 text-[10px] uppercase font-mono font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded">
+							<span className="px-2 py-0.5 text-[10px] uppercase font-mono font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded">
 								Workbench v1.0
 							</span>
 						</div>
-						<p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
+						<p className="text-xs text-zinc-600 dark:text-zinc-400 hidden sm:block">
 							AI-Powered Circuit Schematic & PCB Layout Analyzer
 						</p>
 					</div>
 				</div>
 
 				<div className="flex items-center gap-3">
-					<div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1.5 rounded-full">
+					<div className="hidden sm:flex items-center gap-2 text-xs text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-3 py-1.5 rounded-full">
 						<span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
 						<span className="font-mono text-[11px]">System Ready</span>
 					</div>
