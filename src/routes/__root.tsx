@@ -1,5 +1,10 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+	createRootRoute,
+	HeadContent,
+	Link,
+	Scripts,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "../context/ThemeContext";
 
@@ -44,6 +49,7 @@ export const Route = createRootRoute({
 			},
 		],
 	}),
+	notFoundComponent: NotFoundComponent,
 	shellComponent: RootDocument,
 });
 
@@ -69,5 +75,58 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
+	);
+}
+
+function NotFoundComponent() {
+	return (
+		<div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans pcb-grid-pattern">
+			<header className="border-b border-zinc-200 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-950/80 backdrop-blur px-4 py-3">
+				<div className="max-w-7xl mx-auto flex items-center justify-between">
+					<Link to="/" className="flex items-center gap-3 group">
+						<div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center p-1.5 shadow-[0_0_12px_rgba(16,185,129,0.15)] group-hover:border-emerald-500/60 transition-colors">
+							<img
+								src="/assets/images/icon.svg"
+								alt="OpenChainer Logo"
+								className="w-full h-full object-contain"
+							/>
+						</div>
+						<h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
+							Open
+							<span className="text-emerald-500 dark:text-emerald-300 font-mono font-bold">
+								Chainer
+							</span>
+						</h1>
+					</Link>
+				</div>
+			</header>
+
+			<main className="flex-1 flex items-center justify-center p-6">
+				<div className="max-w-md w-full text-center space-y-6 bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 shadow-xl backdrop-blur">
+					<div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-mono text-xl font-bold">
+						404
+					</div>
+
+					<div className="space-y-2">
+						<h2 className="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-100">
+							Trace Not Found
+						</h2>
+						<p className="text-sm text-zinc-600 dark:text-zinc-400">
+							The schematic node or page you are looking for does not exist or
+							has been disconnected from the circuit board.
+						</p>
+					</div>
+
+					<div className="pt-2">
+						<Link
+							to="/"
+							className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition-colors shadow-lg shadow-emerald-600/20"
+						>
+							Return to Workbench
+						</Link>
+					</div>
+				</div>
+			</main>
+		</div>
 	);
 }
