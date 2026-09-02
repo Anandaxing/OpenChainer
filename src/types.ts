@@ -1,5 +1,3 @@
-import type { AnalysisResult } from "./lib/types";
-
 export type AnalysisState =
 	| "idle"
 	| "file_selected"
@@ -8,14 +6,37 @@ export type AnalysisState =
 	| "success"
 	| "error";
 
-export type {
-	AcDcMap,
-	AnalysisResult,
-	ComponentItem,
-	PowerInfo,
-	PowerSourceInfo,
-	RegionInfo,
-} from "./lib/types";
+export interface ComponentItem {
+	designator: string; // e.g. "R1", "Q2", "C5"
+	name: string; // e.g. "10kΩ Resistor"
+	description?: string;
+}
+
+export interface PowerSourceInfo {
+	type: string; // e.g. "Regulated DC Adapter / Battery"
+	voltage: string; // e.g. "5V - 12V DC"
+}
+
+export interface AcDcMap {
+	acDetails: string;
+	dcDetails: string;
+}
+
+export interface AnalysisResult {
+	id: string;
+	filename: string;
+	fileSizeFormatted: string;
+	imageUrl: string;
+	isSchematic: boolean;
+	isCached?: boolean;
+	summary: string;
+	components: ComponentItem[];
+	powerSource: PowerSourceInfo;
+	acDcMap: AcDcMap;
+	educationDetail: string;
+	uncertainties: string[];
+	analyzedAt: string;
+}
 
 export interface HistoryEntry {
 	id: string;

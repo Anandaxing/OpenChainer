@@ -34,6 +34,33 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 		downloadAnchor.remove();
 	};
 
+	if (!result.isSchematic) {
+		return (
+			<div className="p-6 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-500/40 text-center space-y-4">
+				<div className="w-12 h-12 mx-auto rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl font-bold">
+					⚠️
+				</div>
+				<div className="space-y-1">
+					<h3 className="text-base font-bold text-amber-900 dark:text-amber-200">
+						This doesn't look like a schematic
+					</h3>
+					<p className="text-xs text-amber-800 dark:text-amber-300/90 max-w-md mx-auto">
+						{result.summary}
+					</p>
+				</div>
+				{onChangeFile && (
+					<button
+						type="button"
+						onClick={onChangeFile}
+						className="px-4 py-2 text-xs font-semibold rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition-colors min-h-[44px]"
+					>
+						Try another image
+					</button>
+				)}
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-6">
 			{/* Panel Header & Cache Badge */}
@@ -160,7 +187,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 				<h3 className="text-xs font-mono uppercase tracking-wider text-indigo-700 dark:text-indigo-400 font-bold flex items-center gap-1.5">
 					<span>🎓</span> How This Circuit Operates
 				</h3>
-				<p className="text-xs text-zinc-800 dark:text-zinc-300 leading-relaxed">
+				<p className="text-xs text-zinc-800 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
 					{result.educationDetail}
 				</p>
 			</section>

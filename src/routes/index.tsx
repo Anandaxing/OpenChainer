@@ -4,6 +4,7 @@ import { AnalyzingPreview } from "../components/AnalyzingPreview";
 import { ErrorCard } from "../components/ErrorCard";
 import { Header } from "../components/Header";
 import { HistoryStrip } from "../components/HistoryStrip";
+import { ProgressStepper } from "../components/ProgressStepper";
 import { ResultPanel } from "../components/ResultSections";
 import { UploadZone } from "../components/UploadZone";
 // DUMMY TEST DATA IMPORTS (Clearly highlighted for easy tracing and backend swapping)
@@ -11,7 +12,7 @@ import {
 	DUMMY_NON_SCHEMATIC_ANALYSIS_RESULT,
 	DUMMY_SCHEMATIC_ANALYSIS_RESULT,
 } from "../dummies/mockData";
-import type { AnalysisResult, AnalysisState, HistoryEntry } from "../types";
+import type { AnalysisResult, AnalysisState, HistoryEntry, Phase } from "../types";
 
 import {
 	clearLocalHistory,
@@ -186,10 +187,13 @@ function DashboardPage() {
 							{previewUrl && (
 								<div className="space-y-3">
 									{state === "analyzing" || state === "uploading" ? (
-										<AnalyzingPreview
-											previewUrl={previewUrl}
-											filename={filename}
-										/>
+										<div className="space-y-4">
+											<AnalyzingPreview
+												previewUrl={previewUrl}
+												filename={filename}
+											/>
+											<ProgressStepper phase={state} />
+										</div>
 									) : (
 										<div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-2 shadow-lg">
 											<div className="relative max-h-[340px] flex items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-950">
