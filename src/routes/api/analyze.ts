@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createHash } from "crypto"; // 🆕
 import { analyzeSchematic, normalizeAnalysisResult } from "../../lib/analyze";
+import { supabase } from "../../lib/supabase"; // 🆕
 
 export const Route = createFileRoute("/api/analyze")({
 	server: {
@@ -25,8 +27,28 @@ export const Route = createFileRoute("/api/analyze")({
 
 					const arrayBuffer = await image.arrayBuffer();
 					const buffer = Buffer.from(arrayBuffer);
-					const base64 = buffer.toString("base64");
 
+					// 🆕 1. Hash the image CONTENT
+					const imageHash = createHash("sha256").update(buffer).digest("hex");
+
+					// 🆕 2. Cache lookup — before calling Gemini
+					const { data: cached, error: lookupError } = await supabase
+						.from("analyses")
+						.select("result")
+						.eq("image_hash", imageHash)
+						.maybeSingle();
+
+					if (lookupError) {
+						console.error("Cache lookup failed:", lookupError);
+						// don't fail the request — just treat as a miss
+					}
+
+					if (cached) {
+						return Response.json({ ...cached.result, isCached: true });
+					}
+
+					// 3. Cache miss → Gemini (unchanged)
+					const base64 = buffer.toString("base64");
 					const result = await analyzeSchematic(base64, image.type);
 
 					const formattedSize =
@@ -37,8 +59,18 @@ export const Route = createFileRoute("/api/analyze")({
 					const normalized = normalizeAnalysisResult(result, image.name);
 					normalized.fileSizeFormatted = formattedSize;
 					normalized.filename = image.name;
+					normalized.analyzedAt = new Date().toISOString();
 
-					return Response.json(normalized);
+					// 🆕 4. Save to cache (non-fatal on failure)
+					const { error: insertError } = await supabase
+						.from("analyses")
+						.insert({ image_hash: imageHash, result: normalized });
+
+					if (insertError) {
+						console.error("Cache write failed:", insertError);
+					}
+
+					return Response.json({ ...normalized, isCached: false });
 				} catch (err: unknown) {
 					console.error("Schematic analysis handler error:", err);
 					const message =
