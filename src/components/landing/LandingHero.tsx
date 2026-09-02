@@ -1,7 +1,14 @@
-import { Link } from "@tanstack/react-router";
 import type React from "react";
 
 export const LandingHero: React.FC = () => {
+	const scrollToWorkspace = (e: React.MouseEvent<HTMLAnchorElement>) => {
+		e.preventDefault();
+		const workspaceEl = document.getElementById("workspace");
+		if (workspaceEl) {
+			workspaceEl.scrollIntoView({ behavior: "smooth" });
+		}
+	};
+
 	return (
 		<div className="flex flex-col justify-center space-y-6 max-w-xl">
 			{/* Tagline Badge */}
@@ -32,14 +39,15 @@ export const LandingHero: React.FC = () => {
 
 			{/* CTA Buttons */}
 			<div className="flex flex-wrap items-center gap-4 pt-2">
-				{/* Primary Button: Get Started */}
-				<Link
-					to="/app"
-					className="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-zinc-950 font-bold text-sm tracking-wide shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all min-h-[44px] flex items-center justify-center gap-2.5 group"
+				{/* Primary Button: Get Started (Smooth Scroll to #workspace) */}
+				<a
+					href="#workspace"
+					onClick={scrollToWorkspace}
+					className="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-zinc-950 font-bold text-sm tracking-wide shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all min-h-[44px] flex items-center justify-center gap-2.5 group cursor-pointer"
 				>
 					<span>Get Started</span>
 					<svg
-						className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
+						className="w-4 h-4 transition-transform group-hover:translate-y-0.5"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke="currentColor"
@@ -49,10 +57,10 @@ export const LandingHero: React.FC = () => {
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
-							d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+							d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
 						/>
 					</svg>
-				</Link>
+				</a>
 
 				{/* Secondary Button: Contribute */}
 				<a

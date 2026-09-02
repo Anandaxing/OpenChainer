@@ -3,6 +3,14 @@ import type React from "react";
 import { ThemeToggle } from "../ThemeToggle";
 
 export const LandingHeader: React.FC = () => {
+	const scrollToWorkspace = (e: React.MouseEvent<HTMLAnchorElement>) => {
+		e.preventDefault();
+		const workspaceEl = document.getElementById("workspace");
+		if (workspaceEl) {
+			workspaceEl.scrollIntoView({ behavior: "smooth" });
+		}
+	};
+
 	return (
 		<header className="border-b border-zinc-200 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-950/80 backdrop-blur sticky top-0 z-40 px-4 py-3 transition-colors shadow-sm dark:shadow-none">
 			<div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -32,11 +40,12 @@ export const LandingHeader: React.FC = () => {
 
 				{/* Right Controls */}
 				<div className="flex items-center gap-3 sm:gap-4">
-					<Link
-						to="/app"
+					<a
+						href="#workspace"
+						onClick={scrollToWorkspace}
 						className="hidden sm:flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-700 hover:text-emerald-600 dark:text-zinc-300 dark:hover:text-emerald-400 transition-colors"
 					>
-						<span>Open Workbench</span>
+						<span>Workbench</span>
 						<svg
 							className="w-3.5 h-3.5"
 							fill="none"
@@ -48,10 +57,10 @@ export const LandingHeader: React.FC = () => {
 							<path
 								strokeLinecap="round"
 								strokeLinejoin="round"
-								d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+								d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"
 							/>
 						</svg>
-					</Link>
+					</a>
 
 					<ThemeToggle />
 				</div>
