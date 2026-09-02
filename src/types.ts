@@ -6,6 +6,8 @@ export type AnalysisState =
 	| "success"
 	| "error";
 
+export type Phase = AnalysisState;
+
 export interface ComponentItem {
 	designator: string; // e.g. "R1", "Q2", "C5"
 	name: string; // e.g. "10kΩ Resistor"
