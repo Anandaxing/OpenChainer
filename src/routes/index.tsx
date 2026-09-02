@@ -58,55 +58,74 @@ function DashboardPage() {
 		setState("file_selected");
 	};
 
-	// Simulated analysis flow (idle -> file_selected -> uploading -> analyzing -> success/error)
+	// Real analysis flow connecting to /api/analyze endpoint
 	const runAnalysis = async (sourceToAnalyze: File | string | null) => {
 		if (!sourceToAnalyze) return;
 
 		setState("uploading");
+		setErrorMessage(null);
+		setIsNonSchematicError(false);
 
-		// Simulate upload delay
-		setTimeout(() => {
-			setState("analyzing");
+		try {
+			let result: AnalysisResult;
 
-			// Simulate analysis delay
-			setTimeout(async () => {
-				// If file name has 'non-schematic' or 'photo', use DUMMY_NON_SCHEMATIC_ANALYSIS_RESULT
-				const isPhoto =
-					typeof sourceToAnalyze !== "string" &&
-					sourceToAnalyze.name.toLowerCase().includes("photo");
+			if (sourceToAnalyze instanceof File) {
+				setState("analyzing");
+				const formData = new FormData();
+				formData.append("image", sourceToAnalyze);
 
-				if (isPhoto) {
-					// Trigger non-schematic photo error card using DUMMY_NON_SCHEMATIC_ANALYSIS_RESULT
-					setIsNonSchematicError(true);
-					setErrorMessage(DUMMY_NON_SCHEMATIC_ANALYSIS_RESULT.summary);
-					setState("error");
-					return;
+				const res = await fetch("/api/analyze", {
+					method: "POST",
+					body: formData,
+				});
+
+				const data = await res.json();
+				if (!res.ok) {
+					throw new Error(
+						data.error || `Analysis failed (Status ${res.status})`,
+					);
 				}
-
-				// Trace dummy variable call: DUMMY_SCHEMATIC_ANALYSIS_RESULT
-				const result: AnalysisResult = {
+				result = data;
+			} else {
+				// Sample preset image fallback
+				setState("analyzing");
+				await new Promise((resolve) => setTimeout(resolve, 800));
+				result = {
 					...DUMMY_SCHEMATIC_ANALYSIS_RESULT,
 					id: `res-${Date.now().toString(36)}`,
-					filename:
-						typeof sourceToAnalyze === "string"
-							? "sample_schematic.svg"
-							: sourceToAnalyze.name,
+					filename: "sample_schematic.svg",
 					analyzedAt: new Date().toISOString(),
 					imageUrl: previewUrl || DUMMY_SCHEMATIC_ANALYSIS_RESULT.imageUrl,
 					isCached: false,
 				};
+			}
 
-				setAnalysisResult(result);
-				setState("success");
-
-				// Save to localStorage history (capped at 10 items)
-				const updatedHistory = await saveToLocalHistory(
-					result,
-					sourceToAnalyze,
+			if (!result.isSchematic) {
+				setIsNonSchematicError(true);
+				setErrorMessage(
+					result.summary ||
+						"The uploaded image does not appear to be a valid schematic or PCB layout.",
 				);
-				setHistory(updatedHistory);
-			}, 2200);
-		}, 800);
+				setState("error");
+				return;
+			}
+
+			result.imageUrl = previewUrl || result.imageUrl || "";
+			setAnalysisResult(result);
+			setState("success");
+
+			const updatedHistory = await saveToLocalHistory(result, sourceToAnalyze);
+			setHistory(updatedHistory);
+		} catch (err: unknown) {
+			console.error("Analysis failed:", err);
+			setIsNonSchematicError(false);
+			setErrorMessage(
+				err instanceof Error
+					? err.message
+					: "Failed to analyze schematic image.",
+			);
+			setState("error");
+		}
 	};
 
 	const handleClearHistory = () => {
