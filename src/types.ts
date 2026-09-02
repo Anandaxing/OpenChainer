@@ -1,3 +1,5 @@
+export type Phase = "idle" | "uploading" | "analyzing" | "done" | "error";
+
 export type AnalysisState =
 	| "idle"
 	| "file_selected"
