@@ -87,11 +87,11 @@ export function normalizeAnalysisResult(
 }
 
 const CANDIDATE_MODELS = [
-	"gemini-2.5-flash",
-	"gemini-3.6-flash",
-	"gemini-3.7-flash",
-	"gemini-flash-latest",
-	"gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-flash-latest", // alias that always points to the newest flash
 ];
 
 export async function analyzeSchematic(
