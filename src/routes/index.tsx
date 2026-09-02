@@ -155,11 +155,11 @@ function SinglePageApp() {
 	};
 
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pcb-grid-pattern transition-colors">
+		<div className="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pcb-grid-pattern transition-colors">
 			<LandingHeader />
 
 			{/* SECTION 1: Top Hero & Visual Showcase Landing Page (Full Viewport) */}
-			<section className="min-h-[calc(100vh-4rem)] flex items-center justify-center max-w-7xl w-full mx-auto p-6 sm:p-8 lg:p-12 border-b border-zinc-200/60 dark:border-zinc-800/60">
+			<section className="min-h-[calc(65vh-4rem)] flex items-center justify-center max-w-7xl w-full mx-auto p-6 sm:p-8 lg:p-12 border-b border-zinc-200/60 dark:border-zinc-800/60">
 				<div
 					className={`w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center transition-all duration-700 transform ${
 						isVisible
@@ -180,13 +180,13 @@ function SinglePageApp() {
 			</section>
 
 			{/* SECTION 2: Bottom Workbench & Schematic Analyzer */}
-			<section id="workspace" className="flex-1 w-full max-w-7xl mx-auto p-6 sm:p-8 lg:p-12 scroll-mt-16">
+			<section id="workspace" className="w-full max-w-7xl mx-auto p-6 sm:p-8 lg:p-12 scroll-mt-16 max-md:h-[100vh] min-md:h-[75vh]">
 				<div className="text-center space-y-2 mb-8">
 					<h2 className="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-100">
 						Schematic Analysis Workbench
 					</h2>
 					<p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto">
-						Upload a circuit diagram or select a sample schematic below to trigger instant AI parsing.
+						Select and upload your circuit diagram below to trigger instant AI parsing.
 					</p>
 				</div>
 
