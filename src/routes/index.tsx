@@ -2,27 +2,29 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AnalyzingPreview } from "../components/AnalyzingPreview";
 import { ErrorCard } from "../components/ErrorCard";
-import { Header } from "../components/Header";
 import { HistoryStrip } from "../components/HistoryStrip";
+import { LandingFooter } from "../components/landing/LandingFooter";
+import { LandingHeader } from "../components/landing/LandingHeader";
+import { LandingHero } from "../components/landing/LandingHero";
+import { LandingVisuals } from "../components/landing/LandingVisuals";
 import { ProgressStepper } from "../components/ProgressStepper";
 import { ResultPanel } from "../components/ResultSections";
 import { UploadZone } from "../components/UploadZone";
-// DUMMY TEST DATA IMPORTS (Clearly highlighted for easy tracing and backend swapping)
-import {
-	DUMMY_NON_SCHEMATIC_ANALYSIS_RESULT,
-	DUMMY_SCHEMATIC_ANALYSIS_RESULT,
-} from "../dummies/mockData";
-import type { AnalysisResult, AnalysisState, HistoryEntry, Phase } from "../types";
-
+import { DUMMY_SCHEMATIC_ANALYSIS_RESULT } from "../dummies/mockData";
+import type { AnalysisResult, AnalysisState, HistoryEntry } from "../types";
 import {
 	clearLocalHistory,
 	getLocalHistory,
 	saveToLocalHistory,
 } from "../utils/history";
 
-export const Route = createFileRoute("/")({ component: DashboardPage });
+export const Route = createFileRoute("/")({ component: SinglePageApp });
 
-function DashboardPage() {
+function SinglePageApp() {
+	// Landing page entrance animation state
+	const [isVisible, setIsVisible] = useState(false);
+
+	// Analyzer state machine state
 	const [state, setState] = useState<AnalysisState>("idle");
 	const [selectedSource, setSelectedSource] = useState<File | string | null>(
 		null,
@@ -36,12 +38,14 @@ function DashboardPage() {
 	const [isNonSchematicError, setIsNonSchematicError] = useState(false);
 	const [history, setHistory] = useState<HistoryEntry[]>([]);
 
-	// Load history on mount
+	// Mount entrance animation & load history
 	useEffect(() => {
+		const timer = setTimeout(() => setIsVisible(true), 50);
 		setHistory(getLocalHistory());
+		return () => clearTimeout(timer);
 	}, []);
 
-	// Create preview URL when file/source selected
+	// Select image source for analysis
 	const handleSelectFile = (source: File | string) => {
 		setSelectedSource(source);
 		setErrorMessage(null);
@@ -59,7 +63,7 @@ function DashboardPage() {
 		setState("file_selected");
 	};
 
-	// Real analysis flow connecting to /api/analyze endpoint
+	// Execute analysis flow via /api/analyze
 	const runAnalysis = async (sourceToAnalyze: File | string | null) => {
 		if (!sourceToAnalyze) return;
 
@@ -151,18 +155,47 @@ function DashboardPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pcb-grid-pattern transition-colors">
-			<Header />
+		<div className="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col pcb-grid-pattern transition-colors">
+			<LandingHeader />
 
-			{/* Main Single-Page Dashboard Container */}
-			<main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+			{/* SECTION 1: Top Hero & Visual Showcase Landing Page (Full Viewport) */}
+			<section className="min-h-[calc(65vh-4rem)] flex items-center justify-center max-w-7xl w-full mx-auto p-6 sm:p-8 lg:p-12 border-b border-zinc-200/60 dark:border-zinc-800/60">
+				<div
+					className={`w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center transition-all duration-700 transform ${
+						isVisible
+							? "opacity-100 translate-y-0"
+							: "opacity-0 translate-y-4"
+					}`}
+				>
+					{/* Left Column: Hero Text & CTAs */}
+					<div className="flex justify-center lg:justify-start">
+						<LandingHero />
+					</div>
+
+					{/* Right Column: Visual Showcase */}
+					<div className="flex justify-center lg:justify-end">
+						<LandingVisuals />
+					</div>
+				</div>
+			</section>
+
+			{/* SECTION 2: Bottom Workbench & Schematic Analyzer */}
+			<section id="workspace" className="w-full max-w-7xl mx-auto p-6 sm:p-8 lg:p-12 scroll-mt-16 max-md:h-[100vh] min-md:h-[75vh]">
+				<div className="text-center space-y-2 mb-8">
+					<h2 className="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-100">
+						Schematic Analysis Workbench
+					</h2>
+					<p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto">
+						Select and upload your circuit diagram below to trigger instant AI parsing.
+					</p>
+				</div>
+
 				{/* State 1: IDLE - Upload Zone + History */}
 				{state === "idle" && (
 					<div className="max-w-3xl mx-auto space-y-6">
 						<UploadZone
 							onFileSelect={(file) => {
 								handleSelectFile(file);
-								// Auto trigger analysis
 								runAnalysis(file);
 							}}
 							onError={(err) => {
@@ -182,7 +215,7 @@ function DashboardPage() {
 				{/* State 2, 3, 4: FILE_SELECTED / UPLOADING / ANALYZING / SUCCESS / ERROR */}
 				{state !== "idle" && (
 					<div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-						{/* LEFT COLUMN (Desktop 4/12 = 1/3 width): Image Preview & State Machine Control */}
+						{/* LEFT COLUMN: Image Preview & State Machine Control */}
 						<div className="lg:col-span-4 space-y-4 lg:sticky lg:top-20">
 							{previewUrl && (
 								<div className="space-y-3">
@@ -241,7 +274,7 @@ function DashboardPage() {
 							)}
 						</div>
 
-						{/* RIGHT COLUMN (Desktop 8/12 = 2/3 width): Results Panel / Error State */}
+						{/* RIGHT COLUMN: Results Panel / Error State */}
 						<div className="lg:col-span-8 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto pr-1">
 							{state === "success" && analysisResult && (
 								<div className="space-y-4">
@@ -251,7 +284,6 @@ function DashboardPage() {
 										onChangeFile={resetToIdle}
 									/>
 
-									{/* Dev Callout explicitly highlighting the dummy variable called */}
 									<div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-400 flex items-center justify-between shadow-sm dark:shadow-none">
 										<span>
 											Active Data Source:{" "}
@@ -280,13 +312,9 @@ function DashboardPage() {
 						</div>
 					</div>
 				)}
-			</main>
+			</section>
 
-			{/* Global Footer */}
-			<footer className="border-t border-zinc-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400 font-mono transition-colors">
-				OpenChainer &copy; {new Date().getFullYear()} — Open Schematic Analysis
-				Workbench
-			</footer>
+			<LandingFooter />
 		</div>
 	);
 }

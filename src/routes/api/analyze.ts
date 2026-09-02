@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createHash } from "crypto"; // 🆕
+import { createHash } from "crypto";
 import { analyzeSchematic, normalizeAnalysisResult } from "../../lib/analyze";
-import { supabase } from "../../lib/supabase"; // 🆕
+import { supabase } from "../../lib/supabase";
 
 export const Route = createFileRoute("/api/analyze")({
+	// @ts-ignore - TanStack Start server route handler option
 	server: {
 		handlers: {
-			POST: async ({ request }) => {
+			POST: async ({ request }: { request: Request }) => {
 				try {
 					const formData = await request.formData();
 					const image = formData.get("image");
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/api/analyze")({
 						return Response.json({ ...cached.result, isCached: true });
 					}
 
-					// 3. Cache miss → Gemini (unchanged)
+					// 3. Cache miss → Gemini
 					const base64 = buffer.toString("base64");
 					const result = await analyzeSchematic(base64, image.type);
 
