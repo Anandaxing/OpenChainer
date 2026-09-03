@@ -86,32 +86,44 @@ export function normalizeAnalysisResult(
 	};
 }
 
-const CANDIDATE_MODELS = [
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-2.0-flash-lite",
-  "gemini-flash-latest", // alias that always points to the newest flash
+// Helper to extract environment variable safely across server & bundler contexts
+function getEnvVar(key: string): string | undefined {
+	if (typeof process !== "undefined" && process.env?.[key]) {
+		return process.env[key];
+	}
+	if (typeof import.meta !== "undefined" && import.meta.env?.[key]) {
+		return import.meta.env[key];
+	}
+	return undefined;
+}
+
+// -----------------------------------------------------------------------------
+// 1. Google Gemini Provider
+// -----------------------------------------------------------------------------
+const GEMINI_CANDIDATE_MODELS = [
+	"gemini-2.5-flash",
+	"gemini-2.5-flash-lite",
+	"gemini-2.0-flash",
+	"gemini-2.0-flash-lite",
+	"gemini-flash-latest",
 ];
 
-export async function analyzeSchematic(
+async function analyzeWithGemini(
 	base64: string,
 	mimeType: string,
 ): Promise<AnalysisResult> {
-	const apiKey =
-		process.env.GEMINI_API_KEY ||
-		(typeof import.meta !== "undefined" && import.meta.env?.GEMINI_API_KEY);
+	const apiKey = getEnvVar("GEMINI_API_KEY");
+	const baseUrl =
+		getEnvVar("GEMINI_BASE_URL") || "https://generativelanguage.googleapis.com";
 
 	if (!apiKey) {
-		throw new Error(
-			"GEMINI_API_KEY environment variable is missing. Please set it in .env.local.",
-		);
+		throw new Error("GEMINI_API_KEY environment variable is not configured.");
 	}
 
 	let lastErrorText = "";
 
-	for (const model of CANDIDATE_MODELS) {
-		const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+	for (const model of GEMINI_CANDIDATE_MODELS) {
+		const url = `${baseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
 		for (let attempt = 0; attempt < 2; attempt++) {
 			try {
@@ -139,7 +151,9 @@ export async function analyzeSchematic(
 						await new Promise((r) => setTimeout(r, 1000));
 						continue;
 					}
-					console.warn(`Model ${model} returned status ${res.status}, trying next model...`);
+					console.warn(
+						`[Gemini Provider] Model ${model} returned status ${res.status}, trying next model...`,
+					);
 					break;
 				}
 
@@ -154,10 +168,227 @@ export async function analyzeSchematic(
 				parsed.provider = `Gemini (${model})`;
 				return normalizeAnalysisResult(parsed);
 			} catch (err) {
-				console.warn(`Error attempting model ${model} (attempt ${attempt + 1}):`, err);
+				console.warn(
+					`[Gemini Provider] Error attempting model ${model} (attempt ${attempt + 1}):`,
+					err,
+				);
 			}
 		}
 	}
 
-	throw new Error(`Gemini API error: ${lastErrorText || "No valid response from candidate models"}`);
+	throw new Error(
+		`Gemini API failed: ${lastErrorText || "No response from candidate models"}`,
+	);
+}
+
+// -----------------------------------------------------------------------------
+// 2. Groq LPU / Vision Provider
+// -----------------------------------------------------------------------------
+const GROQ_CANDIDATE_MODELS = [
+	"llama-3.2-11b-vision-preview",
+	"llama-3.2-90b-vision-preview",
+];
+
+async function analyzeWithGroq(
+	base64: string,
+	mimeType: string,
+): Promise<AnalysisResult> {
+	const apiKey = getEnvVar("GROQ_API_KEY");
+	const baseUrl = getEnvVar("GROQ_BASE_URL") || "https://api.groq.com/openai/v1";
+
+	if (!apiKey) {
+		throw new Error("GROQ_API_KEY environment variable is not configured.");
+	}
+
+	let lastErrorText = "";
+
+	for (const model of GROQ_CANDIDATE_MODELS) {
+		const url = `${baseUrl}/chat/completions`;
+
+		try {
+			const res = await fetch(url, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${apiKey}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					model,
+					messages: [
+						{
+							role: "user",
+							content: [
+								{ type: "text", text: PROMPT },
+								{
+									type: "image_url",
+									image_url: { url: `data:${mimeType};base64,${base64}` },
+								},
+							],
+						},
+					],
+					response_format: { type: "json_object" },
+				}),
+			});
+
+			if (!res.ok) {
+				lastErrorText = await res.text();
+				console.warn(
+					`[Groq Provider] Model ${model} returned status ${res.status}, trying next model...`,
+				);
+				continue;
+			}
+
+			const data = await res.json();
+			const responseText = data.choices?.[0]?.message?.content;
+
+			if (!responseText) {
+				continue;
+			}
+
+			const parsed = JSON.parse(responseText) as Partial<AnalysisResult>;
+			parsed.provider = `Groq (${model})`;
+			return normalizeAnalysisResult(parsed);
+		} catch (err) {
+			console.warn(`[Groq Provider] Error attempting model ${model}:`, err);
+		}
+	}
+
+	throw new Error(
+		`Groq API failed: ${lastErrorText || "No response from candidate models"}`,
+	);
+}
+
+// -----------------------------------------------------------------------------
+// 3. OpenRouter Free Models Provider
+// -----------------------------------------------------------------------------
+const OPENROUTER_CANDIDATE_MODELS = [
+	"meta-llama/llama-3.2-11b-vision-instruct:free",
+	"google/gemini-2.5-flash:free",
+	"qwen/qwen-2-vl-7b-instruct:free",
+];
+
+async function analyzeWithOpenRouter(
+	base64: string,
+	mimeType: string,
+): Promise<AnalysisResult> {
+	const apiKey = getEnvVar("OPENROUTER_API_KEY");
+	const baseUrl =
+		getEnvVar("OPENROUTER_BASE_URL") || "https://openrouter.ai/api/v1";
+
+	if (!apiKey) {
+		throw new Error(
+			"OPENROUTER_API_KEY environment variable is not configured.",
+		);
+	}
+
+	let lastErrorText = "";
+
+	for (const model of OPENROUTER_CANDIDATE_MODELS) {
+		const url = `${baseUrl}/chat/completions`;
+
+		try {
+			const res = await fetch(url, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${apiKey}`,
+					"HTTP-Referer": "https://openchainer.org",
+					"X-Title": "OpenChainer",
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					model,
+					messages: [
+						{
+							role: "user",
+							content: [
+								{ type: "text", text: PROMPT },
+								{
+									type: "image_url",
+									image_url: { url: `data:${mimeType};base64,${base64}` },
+								},
+							],
+						},
+					],
+					response_format: { type: "json_object" },
+				}),
+			});
+
+			if (!res.ok) {
+				lastErrorText = await res.text();
+				console.warn(
+					`[OpenRouter Provider] Model ${model} returned status ${res.status}, trying next model...`,
+				);
+				continue;
+			}
+
+			const data = await res.json();
+			const responseText = data.choices?.[0]?.message?.content;
+
+			if (!responseText) {
+				continue;
+			}
+
+			const parsed = JSON.parse(responseText) as Partial<AnalysisResult>;
+			parsed.provider = `OpenRouter (${model})`;
+			return normalizeAnalysisResult(parsed);
+		} catch (err) {
+			console.warn(`[OpenRouter Provider] Error attempting model ${model}:`, err);
+		}
+	}
+
+	throw new Error(
+		`OpenRouter API failed: ${lastErrorText || "No response from candidate models"}`,
+	);
+}
+
+// -----------------------------------------------------------------------------
+// Orchestrator: Multi-Provider Fallback Chain (Gemini -> Groq -> OpenRouter)
+// -----------------------------------------------------------------------------
+export async function analyzeSchematic(
+	base64: string,
+	mimeType: string,
+): Promise<AnalysisResult> {
+	const errors: string[] = [];
+
+	// Step 1: Attempt Google Gemini (Primary)
+	try {
+		console.log("[Fallback Pipeline] Attempting Primary Provider: Google Gemini");
+		return await analyzeWithGemini(base64, mimeType);
+	} catch (geminiError: unknown) {
+		const msg =
+			geminiError instanceof Error
+				? geminiError.message
+				: String(geminiError);
+		console.warn("[Fallback Pipeline] Primary Gemini failed:", msg);
+		errors.push(`Gemini: ${msg}`);
+	}
+
+	// Step 2: Fallback to Groq (Secondary)
+	try {
+		console.log("[Fallback Pipeline] Attempting Secondary Provider: Groq");
+		return await analyzeWithGroq(base64, mimeType);
+	} catch (groqError: unknown) {
+		const msg =
+			groqError instanceof Error ? groqError.message : String(groqError);
+		console.warn("[Fallback Pipeline] Secondary Groq failed:", msg);
+		errors.push(`Groq: ${msg}`);
+	}
+
+	// Step 3: Fallback to OpenRouter (Tertiary)
+	try {
+		console.log("[Fallback Pipeline] Attempting Tertiary Provider: OpenRouter");
+		return await analyzeWithOpenRouter(base64, mimeType);
+	} catch (openRouterError: unknown) {
+		const msg =
+			openRouterError instanceof Error
+				? openRouterError.message
+				: String(openRouterError);
+		console.warn("[Fallback Pipeline] Tertiary OpenRouter failed:", msg);
+		errors.push(`OpenRouter: ${msg}`);
+	}
+
+	// If all providers in the fallback chain fail
+	throw new Error(
+		`All AI Providers Failed. Summary of errors:\n- ${errors.join("\n- ")}`,
+	);
 }

@@ -1,6 +1,5 @@
 import type React from "react";
 import { useRef, useState } from "react";
-import { DUMMY_SAMPLE_SCHEMATIC_DATA_URL } from "../dummies/mockData";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { BsFillImageFill } from "react-icons/bs";
 
