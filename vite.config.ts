@@ -14,6 +14,9 @@ const config = defineConfig({
 		viteReact(),
 		babel({ presets: [reactCompilerPreset()] }),
 	],
+	server: {
+		allowedHosts: ["chrome-broadways-send.ngrok-free.dev"]
+	}
 });
 
 export default config;
