@@ -1,6 +1,8 @@
 import type React from "react";
 import { useRef, useState } from "react";
 import { DUMMY_SAMPLE_SCHEMATIC_DATA_URL } from "../dummies/mockData";
+import { AiOutlineCloudUpload } from "react-icons/ai";
+import { BsFillImageFill } from "react-icons/bs";
 
 interface UploadZoneProps {
 	onFileSelect: (file: File | string) => void;
@@ -100,22 +102,8 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 				/>
 
 				<div className="flex flex-col items-center justify-center space-y-3">
-					<div className="w-14 h-14 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-transform">
-						<svg
-							className="w-7 h-7"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							aria-hidden="true"
-						>
-							<title>Upload Image Icon</title>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={1.8}
-								d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-							/>
-						</svg>
+					<div className="text-3xl w-14 h-14 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-transform">
+							<AiOutlineCloudUpload />
 					</div>
 
 					<div className="space-y-1">
@@ -139,16 +127,9 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
 						<button
 							type="button"
 							onClick={() => cameraInputRef.current?.click()}
-							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 transition-colors min-h-[44px] min-w-[44px]"
+							className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 transition-colors min-h-[44px] min-w-[44px]"
 						>
-							🏞️ Upload Your Picture
-						</button>
-						<button
-							type="button"
-							onClick={() => onFileSelect(DUMMY_SAMPLE_SCHEMATIC_DATA_URL)}
-							className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors min-h-[44px]"
-						>
-							⚡ Load Sample Schematic
+							<BsFillImageFill /> Upload Your Design
 						</button>
 					</div>
 				</div>
