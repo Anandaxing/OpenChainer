@@ -6,6 +6,7 @@ interface ErrorCardProps {
 	errorMessage: string;
 	actionableTip?: string;
 	isNonSchematic?: boolean;
+	retryCountdown?: number;
 	onTryAgain: () => void;
 	onChooseAnother: () => void;
 }
@@ -14,9 +15,12 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
 	errorMessage,
 	actionableTip = "Ensure your photo is taken directly under bright light with high contrast line visibility.",
 	isNonSchematic = false,
+	retryCountdown = 0,
 	onTryAgain,
 	onChooseAnother,
 }) => {
+	const isCountingDown = retryCountdown > 0;
+
 	return (
 		<div className="p-5 sm:p-6 rounded-xl bg-white dark:bg-zinc-900 border border-red-300 dark:border-red-500/30 space-y-4 shadow-sm dark:shadow-none">
 			<div className="flex items-start gap-3">
@@ -27,10 +31,14 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
 					<h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
 						{isNonSchematic
 							? "Non-Schematic Image Detected"
-							: "Analysis Failed"}
+							: isCountingDown
+								? "Rate Limit Reached"
+								: "Analysis Failed"}
 					</h3>
 					<p className="text-sm text-red-600 dark:text-red-300/90">
-						{errorMessage}
+						{isCountingDown
+							? `Rate limit reached. Please wait ${retryCountdown} second${retryCountdown === 1 ? "" : "s"} before analyzing another schematic.`
+							: errorMessage}
 					</p>
 				</div>
 			</div>
@@ -67,10 +75,16 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
 			<div className="flex flex-wrap items-center gap-3 pt-2">
 				<button
 					type="button"
+					disabled={isCountingDown}
 					onClick={onTryAgain}
-					className="cursor-pointer flex items-center gap-[4px] px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-colors min-h-[44px]"
+					className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg transition-colors min-h-[44px] ${
+						isCountingDown
+							? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed border border-zinc-300 dark:border-zinc-700"
+							: "cursor-pointer bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+					}`}
 				>
-					<RiLoopRightLine /> Try Again
+					<RiLoopRightLine className={isCountingDown ? "animate-spin" : ""} />
+					{isCountingDown ? `Try Again in ${retryCountdown}s` : "Try Again"}
 				</button>
 				<button
 					type="button"

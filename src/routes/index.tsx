@@ -37,6 +37,7 @@ function SinglePageApp() {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [isNonSchematicError, setIsNonSchematicError] = useState(false);
 	const [history, setHistory] = useState<HistoryEntry[]>([]);
+	const [retryCountdown, setRetryCountdown] = useState<number>(0);
 
 	// Mount entrance animation & load history
 	useEffect(() => {
@@ -44,6 +45,27 @@ function SinglePageApp() {
 		setHistory(getLocalHistory());
 		return () => clearTimeout(timer);
 	}, []);
+
+	// Real-time countdown timer for rate-limiting
+	useEffect(() => {
+		if (retryCountdown <= 0) return;
+		const timer = setInterval(() => {
+			setRetryCountdown((prev) => Math.max(0, prev - 1));
+		}, 1000);
+		return () => clearInterval(timer);
+	}, [retryCountdown]);
+
+	// Convert base64 data URL string to a File object for re-analysis via API
+	const dataUrlToFile = async (
+		dataUrl: string,
+		defaultFilename = "schematic.png",
+	): Promise<File> => {
+		const res = await fetch(dataUrl);
+		const blob = await res.blob();
+		return new File([blob], defaultFilename, {
+			type: blob.type || "image/png",
+		});
+	};
 
 	// Select image source for analysis
 	const handleSelectFile = (source: File | string) => {
@@ -73,11 +95,24 @@ function SinglePageApp() {
 
 		try {
 			let result: AnalysisResult;
+			let fileToUpload: File | null = null;
 
 			if (sourceToAnalyze instanceof File) {
+				fileToUpload = sourceToAnalyze;
+			} else if (
+				typeof sourceToAnalyze === "string" &&
+				sourceToAnalyze.startsWith("data:")
+			) {
+				fileToUpload = await dataUrlToFile(
+					sourceToAnalyze,
+					filename || "schematic.png",
+				);
+			}
+
+			if (fileToUpload) {
 				setState("analyzing");
 				const formData = new FormData();
-				formData.append("image", sourceToAnalyze);
+				formData.append("image", fileToUpload);
 
 				const res = await fetch("/api/analyze", {
 					method: "POST",
@@ -87,8 +122,10 @@ function SinglePageApp() {
 				const data = await res.json();
 				if (!res.ok) {
 					if (res.status === 429) {
-						const retrySeconds =
-							data.retryAfter || res.headers.get("Retry-After") || 60;
+						const retrySeconds = Number(
+							data.retryAfter || res.headers.get("Retry-After") || 60,
+						);
+						setRetryCountdown(retrySeconds);
 						throw new Error(
 							`Too many requests. Please wait ${retrySeconds} second${Number(retrySeconds) === 1 ? "" : "s"} before analyzing another schematic.`,
 						);
@@ -148,7 +185,9 @@ function SinglePageApp() {
 	};
 
 	const handleSelectHistoryEntry = (entry: HistoryEntry) => {
-		setPreviewUrl(entry.thumbnailUrl);
+		const source = entry.thumbnailUrl || entry.result.imageUrl || "";
+		setSelectedSource(source);
+		setPreviewUrl(source);
 		setFilename(entry.filename);
 		setAnalysisResult(entry.result);
 		setState("success");
@@ -318,6 +357,7 @@ function SinglePageApp() {
 										"An error occurred while processing the schematic."
 									}
 									isNonSchematic={isNonSchematicError}
+									retryCountdown={retryCountdown}
 									onTryAgain={() => runAnalysis(selectedSource)}
 									onChooseAnother={resetToIdle}
 								/>

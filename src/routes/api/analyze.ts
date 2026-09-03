@@ -1,7 +1,11 @@
 import { createHash } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { analyzeSchematic, normalizeAnalysisResult } from "../../lib/analyze";
-import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
+import {
+	checkRateLimit,
+	getClientIp,
+	shouldLogRateLimitWarning,
+} from "../../lib/rateLimit";
 import { supabase } from "../../lib/supabase";
 
 export const Route = createFileRoute("/api/analyze")({
@@ -14,9 +18,11 @@ export const Route = createFileRoute("/api/analyze")({
 					const { allowed, retryAfter } = checkRateLimit(clientIp);
 
 					if (!allowed) {
-						console.warn(
-							`[RateLimit] Blocked request from IP ${clientIp}. Retry after ${retryAfter}s.`,
-						);
+						if (shouldLogRateLimitWarning(clientIp)) {
+							console.warn(
+								`[RateLimit] Blocked request from IP ${clientIp}. Retry after ${retryAfter}s.`,
+							);
+						}
 						return Response.json(
 							{
 								error: "Too many requests. Please wait before trying again.",
