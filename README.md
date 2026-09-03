@@ -5,6 +5,7 @@
 # ⚡ OPENCHAINER
 
 v1.0.0 (first release)
+Visit website: 
 
 **An open-source, resilient AI tool for analyzing electrical schematics and circuit diagrams**
 
@@ -46,6 +47,7 @@ Upload an electrical schematic or PCB layout → receive automated component ide
 - [🧪 Scripts & Tooling](#-scripts--tooling)
 - [📋 Roadmap](#-roadmap)
 - [🤝 Contributing](#-contributing)
+- [📦 Version History](#-version-history--changelog)
 - [📄 License](#-license)
 
 ---
