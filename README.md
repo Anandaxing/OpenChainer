@@ -4,10 +4,15 @@
 
 # ⚡ OPENCHAINER
 
+v1.0.0 (first release)
+
 **An open-source, resilient AI tool for analyzing electrical schematics and circuit diagrams**
 
 Upload an electrical schematic or PCB layout → receive automated component identification, AC/DC power path tracing, and plain-language circuit explanations in seconds.
 
+[![GitHub Stars](https://img.shields.io/github/stars/Anandaxing/OpenChainer?style=for-the-badge&logo=github&color=gold)](https://github.com/Anandaxing/OpenChainer/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Anandaxing/OpenChainer?style=for-the-badge&logo=github&color=blue)](https://github.com/Anandaxing/OpenChainer/network/members)
+[![LLMs: 3 Providers | 10 Models](https://img.shields.io/badge/LLMs-3%20Providers%20%7C%2010%20Models-9333ea.svg?style=for-the-badge&logo=openai)](#-llm-architecture--fallback-pipeline)
 [![Framework: TanStack Start](https://img.shields.io/badge/Framework-TanStack%20Start-black.svg?logo=react&style=for-the-badge)](https://tanstack.com/start)
 [![React: 19](https://img.shields.io/badge/React-19-blue.svg?logo=react&style=for-the-badge)](https://react.dev/)
 [![Styling: Tailwind CSS v4](https://img.shields.io/badge/Tailwind-CSS%20v4-38bdf8.svg?logo=tailwindcss&style=for-the-badge)](https://tailwindcss.com/)
@@ -386,6 +391,12 @@ curl -X POST http://localhost:3000/api/analyze \
 
 ---
 
+## 📦 Version History / Changelog
+- **v1.0.0** (Current)
+  - First release with TanStack Start & React 19.
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Whether you want to improve prompt engineering, add new vision providers, or enhance the workbench UI:
@@ -418,6 +429,6 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 <div align="center">
 
-Built with Tanstack Start & Gemini AI by [Ananda Adiputra](https://github.com/Anandaxing) and open-source contributors.
+Built with TanStack Start & Gemini AI by [Ananda Adiputra](https://github.com/Anandaxing) and open-source contributors.
 
 </div>
