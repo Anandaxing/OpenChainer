@@ -1,14 +1,36 @@
+import { createHash } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
-import { createHash } from "crypto";
 import { analyzeSchematic, normalizeAnalysisResult } from "../../lib/analyze";
+import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
 import { supabase } from "../../lib/supabase";
 
 export const Route = createFileRoute("/api/analyze")({
-	// @ts-ignore - TanStack Start server route handler option
 	server: {
 		handlers: {
 			POST: async ({ request }: { request: Request }) => {
 				try {
+					// 🛡️ Rate Limiting: 10 requests / minute per IP
+					const clientIp = getClientIp(request);
+					const { allowed, retryAfter } = checkRateLimit(clientIp);
+
+					if (!allowed) {
+						console.warn(
+							`[RateLimit] Blocked request from IP ${clientIp}. Retry after ${retryAfter}s.`,
+						);
+						return Response.json(
+							{
+								error: "Too many requests. Please wait before trying again.",
+								retryAfter,
+							},
+							{
+								status: 429,
+								headers: {
+									"Retry-After": String(retryAfter),
+								},
+							},
+						);
+					}
+
 					const formData = await request.formData();
 					const image = formData.get("image");
 

@@ -86,6 +86,13 @@ function SinglePageApp() {
 
 				const data = await res.json();
 				if (!res.ok) {
+					if (res.status === 429) {
+						const retrySeconds =
+							data.retryAfter || res.headers.get("Retry-After") || 60;
+						throw new Error(
+							`Too many requests. Please wait ${retrySeconds} second${Number(retrySeconds) === 1 ? "" : "s"} before analyzing another schematic.`,
+						);
+					}
 					throw new Error(
 						data.error || `Analysis failed (Status ${res.status})`,
 					);
