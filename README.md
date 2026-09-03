@@ -1,6 +1,6 @@
 <div align="center">
 
-<img w="800" h="400" src="/public/assets/images/open_chainer_thumbnail_svg" alt="Open Chainer Thumbnail" />
+<img w="800" h="400" src="/public/assets/images/open_chainer_thumbnail.svg" alt="Open Chainer Thumbnail" />
 
 # ⚡ OPENCHAINER
 
