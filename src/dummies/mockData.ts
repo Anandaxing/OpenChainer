@@ -12,6 +12,7 @@ export const DUMMY_SCHEMATIC_ANALYSIS_RESULT: AnalysisResult = {
 		"https://placehold.co/600x450/18181b/10b981?text=555+Timer+Circuit+Schematic",
 	isSchematic: true,
 	isCached: false,
+	provider: "Mock Data (555 Timer)",
 	summary:
 		"A classic astable multivibrator circuit based on the NE555 timer IC. It generates a continuous square-wave pulse sequence ideal for LED blinking or clock signal generation.",
 	components: [

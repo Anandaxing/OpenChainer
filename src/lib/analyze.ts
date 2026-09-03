@@ -29,6 +29,60 @@ Output MUST be strictly valid JSON matching this schema:
   "uncertainties": [ "string" ]
 }`;
 
+/**
+ * Safely extracts and parses JSON from raw LLM responses.
+ * Handles markdown code fences (```json ... ```), preambles, and postambles.
+ */
+export function extractJson<T = unknown>(text: string): T {
+	if (!text || typeof text !== "string") {
+		throw new Error("extractJson received empty or non-string input");
+	}
+
+	// 1. If wrapped in markdown code fences, extract the fence content first
+	const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+	const candidate = codeBlockMatch ? codeBlockMatch[1].trim() : text.trim();
+
+	// 2. Try direct JSON parse on candidate block
+	try {
+		return JSON.parse(candidate) as T;
+	} catch {
+		// Fall through to boundary extraction
+	}
+
+	// 3. Find outermost JSON object boundaries: first '{' to last '}'
+	const start = candidate.indexOf("{");
+	const end = candidate.lastIndexOf("}");
+
+	if (start !== -1 && end !== -1 && start < end) {
+		const jsonSlice = candidate.slice(start, end + 1);
+		try {
+			return JSON.parse(jsonSlice) as T;
+		} catch {
+			// Fall through
+		}
+	}
+
+	// 4. Fallback: strip all backticks and search whole string
+	const stripped = text
+		.replace(/```(?:json)?/gi, "")
+		.replace(/```/g, "")
+		.trim();
+	const strippedStart = stripped.indexOf("{");
+	const strippedEnd = stripped.lastIndexOf("}");
+
+	if (
+		strippedStart !== -1 &&
+		strippedEnd !== -1 &&
+		strippedStart < strippedEnd
+	) {
+		return JSON.parse(stripped.slice(strippedStart, strippedEnd + 1)) as T;
+	}
+
+	throw new Error(
+		`No valid JSON object found in response: "${text.slice(0, 120)}..."`,
+	);
+}
+
 export function normalizeAnalysisResult(
 	raw: Partial<AnalysisResult>,
 	filename = "schematic_upload.png",
@@ -45,8 +99,9 @@ export function normalizeAnalysisResult(
 
 	const powerSourceType =
 		raw.power?.source || raw.powerSource?.type || "Unknown Power Source";
-	const powerVoltage =
-		raw.power?.voltage || raw.powerSource?.voltage || "N/A";
+	const powerVoltage = raw.power?.voltage || raw.powerSource?.voltage || "N/A";
+
+	const cachedValue = raw.cached ?? raw.isCached ?? false;
 
 	return {
 		id: raw.id || `analysis-${Date.now()}`,
@@ -54,7 +109,8 @@ export function normalizeAnalysisResult(
 		fileSizeFormatted: raw.fileSizeFormatted || "Uploaded File",
 		imageUrl: raw.imageUrl || "",
 		isSchematic: raw.isSchematic ?? true,
-		cached: raw.cached ?? false,
+		cached: cachedValue,
+		isCached: cachedValue,
 		provider: raw.provider || "Gemini AI",
 		summary: raw.summary || "No summary provided.",
 		components: (raw.components || []).map((c) => ({
@@ -101,11 +157,9 @@ function getEnvVar(key: string): string | undefined {
 // 1. Google Gemini Provider
 // -----------------------------------------------------------------------------
 const GEMINI_CANDIDATE_MODELS = [
-	"gemini-2.5-flash",
-	"gemini-2.5-flash-lite",
 	"gemini-2.0-flash",
-	"gemini-2.0-flash-lite",
-	"gemini-flash-latest",
+	"gemini-1.5-flash",
+	"gemini-2.5-flash",
 ];
 
 async function analyzeWithGemini(
@@ -147,6 +201,25 @@ async function analyzeWithGemini(
 
 				if (!res.ok) {
 					lastErrorText = await res.text();
+
+					// Fail-fast on auth, quota, or rate limits to immediately trigger secondary fallback
+					if (
+						res.status === 401 ||
+						res.status === 403 ||
+						res.status === 429 ||
+						(res.status === 400 &&
+							/API_KEY_INVALID|invalid.*api.*key|key.*not.*valid/i.test(
+								lastErrorText,
+							))
+					) {
+						console.warn(
+							`[Gemini Provider] Fatal status ${res.status}, failing fast across all Gemini models: ${lastErrorText}`,
+						);
+						throw new Error(
+							`Gemini API fatal error (${res.status}): ${lastErrorText || "Authentication or quota failure"}`,
+						);
+					}
+
 					if (res.status === 503 && attempt === 0) {
 						await new Promise((r) => setTimeout(r, 1000));
 						continue;
@@ -164,10 +237,17 @@ async function analyzeWithGemini(
 					break;
 				}
 
-				const parsed = JSON.parse(responseText) as Partial<AnalysisResult>;
+				const parsed = extractJson<Partial<AnalysisResult>>(responseText);
 				parsed.provider = `Gemini (${model})`;
 				return normalizeAnalysisResult(parsed);
 			} catch (err) {
+				// If it's our fail-fast error, rethrow immediately to escape candidate models
+				if (
+					err instanceof Error &&
+					err.message.startsWith("Gemini API fatal error")
+				) {
+					throw err;
+				}
 				console.warn(
 					`[Gemini Provider] Error attempting model ${model} (attempt ${attempt + 1}):`,
 					err,
@@ -194,7 +274,8 @@ async function analyzeWithGroq(
 	mimeType: string,
 ): Promise<AnalysisResult> {
 	const apiKey = getEnvVar("GROQ_API_KEY");
-	const baseUrl = getEnvVar("GROQ_BASE_URL") || "https://api.groq.com/openai/v1";
+	const baseUrl =
+		getEnvVar("GROQ_BASE_URL") || "https://api.groq.com/openai/v1";
 
 	if (!apiKey) {
 		throw new Error("GROQ_API_KEY environment variable is not configured.");
@@ -226,12 +307,23 @@ async function analyzeWithGroq(
 							],
 						},
 					],
-					response_format: { type: "json_object" },
+					// Note: response_format is omitted because Groq vision models do not support json_object
 				}),
 			});
 
 			if (!res.ok) {
 				lastErrorText = await res.text();
+
+				// Fail-fast on fatal auth or rate limit errors
+				if (res.status === 401 || res.status === 403 || res.status === 429) {
+					console.warn(
+						`[Groq Provider] Fatal status ${res.status}, failing fast across all Groq models: ${lastErrorText}`,
+					);
+					throw new Error(
+						`Groq API fatal error (${res.status}): ${lastErrorText || "Authentication or rate limit failure"}`,
+					);
+				}
+
 				console.warn(
 					`[Groq Provider] Model ${model} returned status ${res.status}, trying next model...`,
 				);
@@ -245,10 +337,16 @@ async function analyzeWithGroq(
 				continue;
 			}
 
-			const parsed = JSON.parse(responseText) as Partial<AnalysisResult>;
+			const parsed = extractJson<Partial<AnalysisResult>>(responseText);
 			parsed.provider = `Groq (${model})`;
 			return normalizeAnalysisResult(parsed);
 		} catch (err) {
+			if (
+				err instanceof Error &&
+				err.message.startsWith("Groq API fatal error")
+			) {
+				throw err;
+			}
 			console.warn(`[Groq Provider] Error attempting model ${model}:`, err);
 		}
 	}
@@ -263,8 +361,8 @@ async function analyzeWithGroq(
 // -----------------------------------------------------------------------------
 const OPENROUTER_CANDIDATE_MODELS = [
 	"meta-llama/llama-3.2-11b-vision-instruct:free",
-	"google/gemini-2.5-flash:free",
 	"qwen/qwen-2-vl-7b-instruct:free",
+	"google/gemini-2.0-flash-exp:free",
 ];
 
 async function analyzeWithOpenRouter(
@@ -309,12 +407,23 @@ async function analyzeWithOpenRouter(
 							],
 						},
 					],
-					response_format: { type: "json_object" },
+					// Note: response_format is omitted for maximum open-weights model compatibility
 				}),
 			});
 
 			if (!res.ok) {
 				lastErrorText = await res.text();
+
+				// Fail-fast on fatal auth or rate limit errors
+				if (res.status === 401 || res.status === 403 || res.status === 429) {
+					console.warn(
+						`[OpenRouter Provider] Fatal status ${res.status}, failing fast across all OpenRouter models: ${lastErrorText}`,
+					);
+					throw new Error(
+						`OpenRouter API fatal error (${res.status}): ${lastErrorText || "Authentication or rate limit failure"}`,
+					);
+				}
+
 				console.warn(
 					`[OpenRouter Provider] Model ${model} returned status ${res.status}, trying next model...`,
 				);
@@ -328,11 +437,20 @@ async function analyzeWithOpenRouter(
 				continue;
 			}
 
-			const parsed = JSON.parse(responseText) as Partial<AnalysisResult>;
+			const parsed = extractJson<Partial<AnalysisResult>>(responseText);
 			parsed.provider = `OpenRouter (${model})`;
 			return normalizeAnalysisResult(parsed);
 		} catch (err) {
-			console.warn(`[OpenRouter Provider] Error attempting model ${model}:`, err);
+			if (
+				err instanceof Error &&
+				err.message.startsWith("OpenRouter API fatal error")
+			) {
+				throw err;
+			}
+			console.warn(
+				`[OpenRouter Provider] Error attempting model ${model}:`,
+				err,
+			);
 		}
 	}
 
@@ -352,13 +470,13 @@ export async function analyzeSchematic(
 
 	// Step 1: Attempt Google Gemini (Primary)
 	try {
-		console.log("[Fallback Pipeline] Attempting Primary Provider: Google Gemini");
+		console.log(
+			"[Fallback Pipeline] Attempting Primary Provider: Google Gemini",
+		);
 		return await analyzeWithGemini(base64, mimeType);
 	} catch (geminiError: unknown) {
 		const msg =
-			geminiError instanceof Error
-				? geminiError.message
-				: String(geminiError);
+			geminiError instanceof Error ? geminiError.message : String(geminiError);
 		console.warn("[Fallback Pipeline] Primary Gemini failed:", msg);
 		errors.push(`Gemini: ${msg}`);
 	}

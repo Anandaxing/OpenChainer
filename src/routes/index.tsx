@@ -102,6 +102,8 @@ function SinglePageApp() {
 					analyzedAt: new Date().toISOString(),
 					imageUrl: previewUrl || DUMMY_SCHEMATIC_ANALYSIS_RESULT.imageUrl,
 					isCached: false,
+					cached: false,
+					provider: "Sample Preset (Demo)",
 				};
 			}
 
@@ -162,9 +164,7 @@ function SinglePageApp() {
 			<section className="min-h-[calc(65vh-4rem)] flex items-center justify-center max-w-7xl w-full mx-auto p-6 sm:p-8 lg:p-12 border-b border-zinc-200/60 dark:border-zinc-800/60">
 				<div
 					className={`w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center transition-all duration-700 transform ${
-						isVisible
-							? "opacity-100 translate-y-0"
-							: "opacity-0 translate-y-4"
+						isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
 					}`}
 				>
 					{/* Left Column: Hero Text & CTAs */}
@@ -180,13 +180,17 @@ function SinglePageApp() {
 			</section>
 
 			{/* SECTION 2: Bottom Workbench & Schematic Analyzer */}
-			<section id="workspace" className="w-full max-w-7xl mx-auto p-6 sm:p-8 lg:p-12 scroll-mt-16 max-md:h-[100vh] min-md:h-[75vh]">
+			<section
+				id="workspace"
+				className="w-full max-w-7xl mx-auto p-6 sm:p-8 lg:p-12 scroll-mt-16 max-md:h-[100vh] min-md:h-[75vh]"
+			>
 				<div className="text-center space-y-2 mb-8">
 					<h2 className="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-100">
 						Schematic Analysis Workbench
 					</h2>
 					<p className="text-sm text-zinc-600 dark:text-zinc-400 max-w-lg mx-auto">
-						Select and upload your circuit diagram below to trigger instant AI parsing.
+						Select and upload your circuit diagram below to trigger instant AI
+						parsing.
 					</p>
 				</div>
 
@@ -286,13 +290,15 @@ function SinglePageApp() {
 
 									<div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-400 flex items-center justify-between shadow-sm dark:shadow-none">
 										<span>
-											Active Data Source:{" "}
+											Active Provider:{" "}
 											<code className="text-emerald-700 dark:text-emerald-400">
-												DUMMY_SCHEMATIC_ANALYSIS_RESULT
+												{analysisResult.provider || "Gemini AI"}
 											</code>
 										</span>
 										<span className="text-zinc-500 dark:text-zinc-500">
-											src/dummies/mockData.ts
+											{analysisResult.isCached || analysisResult.cached
+												? "Cached (Supabase)"
+												: "Live Analysis"}
 										</span>
 									</div>
 								</div>

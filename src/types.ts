@@ -31,6 +31,8 @@ export interface AnalysisResult {
 	imageUrl: string;
 	isSchematic: boolean;
 	isCached?: boolean;
+	cached?: boolean;
+	provider?: string;
 	summary: string;
 	components: ComponentItem[];
 	powerSource: PowerSourceInfo;
