@@ -157,9 +157,10 @@ function getEnvVar(key: string): string | undefined {
 // 1. Google Gemini Provider
 // -----------------------------------------------------------------------------
 const GEMINI_CANDIDATE_MODELS = [
-	"gemini-2.0-flash",
-	"gemini-1.5-flash",
-	"gemini-2.5-flash",
+	"gemini-3.6-flash",
+	"gemini-3.8-flash",
+	"gemini-flash-latest",
+	"gemini-3.5-flash",
 ];
 
 async function analyzeWithGemini(
@@ -314,13 +315,19 @@ async function analyzeWithGroq(
 			if (!res.ok) {
 				lastErrorText = await res.text();
 
-				// Fail-fast on fatal auth or rate limit errors
-				if (res.status === 401 || res.status === 403 || res.status === 429) {
+				// Fail-fast on fatal auth, rate limit, or decommissioned errors
+				if (
+					res.status === 401 ||
+					res.status === 403 ||
+					res.status === 429 ||
+					res.status === 404 ||
+					lastErrorText.includes("model_decommissioned")
+				) {
 					console.warn(
 						`[Groq Provider] Fatal status ${res.status}, failing fast across all Groq models: ${lastErrorText}`,
 					);
 					throw new Error(
-						`Groq API fatal error (${res.status}): ${lastErrorText || "Authentication or rate limit failure"}`,
+						`Groq API fatal error (${res.status}): ${lastErrorText || "Authentication or model decommissioned failure"}`,
 					);
 				}
 
@@ -360,9 +367,10 @@ async function analyzeWithGroq(
 // 3. OpenRouter Free Models Provider
 // -----------------------------------------------------------------------------
 const OPENROUTER_CANDIDATE_MODELS = [
-	"meta-llama/llama-3.2-11b-vision-instruct:free",
-	"qwen/qwen-2-vl-7b-instruct:free",
-	"google/gemini-2.0-flash-exp:free",
+	"minimax/minimax-m3:free",
+	"google/gemma-4-26b-a4b-it:free",
+	"google/gemma-4-31b-it:free",
+	"nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
 ];
 
 async function analyzeWithOpenRouter(

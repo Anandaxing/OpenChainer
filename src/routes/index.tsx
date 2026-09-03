@@ -182,7 +182,7 @@ function SinglePageApp() {
 			{/* SECTION 2: Bottom Workbench & Schematic Analyzer */}
 			<section
 				id="workspace"
-				className="w-full max-w-7xl mx-auto p-6 sm:p-8 lg:p-12 scroll-mt-16 max-md:h-[100vh] min-md:h-[75vh]"
+				className="w-full max-w-7xl mx-auto p-6 sm:p-8 lg:p-12 scroll-mt-16 min-h-[90vh]"
 			>
 				<div className="text-center space-y-2 mb-8">
 					<h2 className="text-2xl font-bold font-mono tracking-tight text-zinc-900 dark:text-zinc-100">
