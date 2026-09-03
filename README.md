@@ -1,16 +1,17 @@
 <div align="center">
 
+<img w="800" h="400" src="/public/assets/images/open_chainer_thumbnail_svg" alt="Open Chainer Thumbnail" />
+
 # ⚡ OPENCHAINER
 
-**An open-source, resilient AI engine for analyzing electrical schematics and circuit diagrams**
+**An open-source, resilient AI tool for analyzing electrical schematics and circuit diagrams**
 
 Upload an electrical schematic or PCB layout → receive automated component identification, AC/DC power path tracing, and plain-language circuit explanations in seconds.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
-[![Framework: TanStack Start](https://img.shields.io/badge/Framework-TanStack%20Start-black.svg?logo=react)](https://tanstack.com/start)
-[![React: 19](https://img.shields.io/badge/React-19-blue.svg?logo=react)](https://react.dev/)
-[![Styling: Tailwind CSS v4](https://img.shields.io/badge/Tailwind-CSS%20v4-38bdf8.svg?logo=tailwindcss)](https://tailwindcss.com/)
-[![Linter: Biome](https://img.shields.io/badge/Linter-Biome-60a5fa.svg?logo=biome)](https://biomejs.dev/)
+[![Framework: TanStack Start](https://img.shields.io/badge/Framework-TanStack%20Start-black.svg?logo=react&style=for-the-badge)](https://tanstack.com/start)
+[![React: 19](https://img.shields.io/badge/React-19-blue.svg?logo=react&style=for-the-badge)](https://react.dev/)
+[![Styling: Tailwind CSS v4](https://img.shields.io/badge/Tailwind-CSS%20v4-38bdf8.svg?logo=tailwindcss&style=for-the-badge)](https://tailwindcss.com/)
+[![Linter: Biome](https://img.shields.io/badge/Linter-Biome-60a5fa.svg?logo=biome&style=for-the-badge)](https://biomejs.dev/)
 
 [Features](#-features) • [Tech Stack](#️-tech-stack) • [LLM Architecture](#-llm-architecture--fallback-pipeline) • [Architecture](#-system-architecture) • [Getting Started](#-getting-started) • [API](#-api-reference) • [Contributing](#-contributing)
 
@@ -417,6 +418,6 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 <div align="center">
 
-Built with ⚡ by [Ananda Adiputra](https://github.com/Anandaxing) and open-source contributors.
+Built with Tanstack Start & Gemini AI by [Ananda Adiputra](https://github.com/Anandaxing) and open-source contributors.
 
 </div>
