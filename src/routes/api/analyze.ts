@@ -1,11 +1,8 @@
 import { createHash } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { analyzeSchematic, normalizeAnalysisResult } from "../../lib/analyze";
-import {
-	checkRateLimit,
-	getClientIp,
-	shouldLogRateLimitWarning,
-} from "../../lib/rateLimit";
+import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
+import { logErrorOnce, logWarningOnce } from "../../lib/serverLogger";
 import { supabase } from "../../lib/supabase";
 
 export const Route = createFileRoute("/api/analyze")({
@@ -18,11 +15,10 @@ export const Route = createFileRoute("/api/analyze")({
 					const { allowed, retryAfter } = checkRateLimit(clientIp);
 
 					if (!allowed) {
-						if (shouldLogRateLimitWarning(clientIp)) {
-							console.warn(
-								`[RateLimit] Blocked request from IP ${clientIp}. Retry after ${retryAfter}s.`,
-							);
-						}
+						logWarningOnce(
+							`rate-limit-${clientIp}`,
+							`Blocked request from IP ${clientIp}. Retry after ${retryAfter}s.`,
+						);
 						return Response.json(
 							{
 								error: "Too many requests. Please wait before trying again.",
@@ -68,7 +64,11 @@ export const Route = createFileRoute("/api/analyze")({
 						.maybeSingle();
 
 					if (lookupError) {
-						console.error("Cache lookup failed:", lookupError);
+						logErrorOnce(
+							"cache-lookup-failed",
+							"Cache lookup failed:",
+							lookupError,
+						);
 						// don't fail the request — just treat as a miss
 					}
 
@@ -96,16 +96,24 @@ export const Route = createFileRoute("/api/analyze")({
 						.insert({ image_hash: imageHash, result: normalized });
 
 					if (insertError) {
-						console.error("Cache write failed:", insertError);
+						logErrorOnce(
+							"cache-write-failed",
+							"Cache write failed:",
+							insertError,
+						);
 					}
 
 					return Response.json({ ...normalized, isCached: false });
 				} catch (err: unknown) {
-					console.error("Schematic analysis handler error:", err);
 					const message =
 						err instanceof Error
 							? err.message
 							: "Analysis failed. Please try again.";
+					logErrorOnce(
+						`handler-error-${message}`,
+						"Schematic analysis handler error:",
+						err,
+					);
 					return Response.json({ error: message }, { status: 500 });
 				}
 			},
