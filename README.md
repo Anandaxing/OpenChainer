@@ -5,7 +5,7 @@
 # ⚡ OPENCHAINER
 
 v1.0.0 (first release)
-Visit website: https://open-chainer.vercel.app/
+Visit website: <a href="https://openchainer.vercel.app/" target="_blank">https://openchainer.vercel.app/</a>
 
 **An open-source, resilient AI tool for analyzing electrical schematics and circuit diagrams**
 
