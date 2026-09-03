@@ -8,15 +8,19 @@ import { defineConfig } from "vite";
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [
-		devtools(),
+		devtools({
+			consolePiping: {
+				enabled: false,
+			},
+		}),
 		tailwindcss(),
 		tanstackStart(),
 		viteReact(),
 		babel({ presets: [reactCompilerPreset()] }),
 	],
 	server: {
-		allowedHosts: ["chrome-broadways-send.ngrok-free.dev"]
-	}
+		allowedHosts: ["chrome-broadways-send.ngrok-free.dev"],
+	},
 });
 
 export default config;

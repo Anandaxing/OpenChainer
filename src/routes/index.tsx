@@ -38,6 +38,7 @@ function SinglePageApp() {
 	const [isNonSchematicError, setIsNonSchematicError] = useState(false);
 	const [history, setHistory] = useState<HistoryEntry[]>([]);
 	const [retryCountdown, setRetryCountdown] = useState<number>(0);
+	const [isRateLimited, setIsRateLimited] = useState(false);
 
 	// Mount entrance animation & load history
 	useEffect(() => {
@@ -72,6 +73,7 @@ function SinglePageApp() {
 		setSelectedSource(source);
 		setErrorMessage(null);
 		setIsNonSchematicError(false);
+		setIsRateLimited(false);
 
 		if (typeof source === "string") {
 			setPreviewUrl(source);
@@ -88,10 +90,12 @@ function SinglePageApp() {
 	// Execute analysis flow via /api/analyze
 	const runAnalysis = async (sourceToAnalyze: File | string | null) => {
 		if (!sourceToAnalyze) return;
+		if (state === "uploading" || state === "analyzing") return;
 
 		setState("uploading");
 		setErrorMessage(null);
 		setIsNonSchematicError(false);
+		setIsRateLimited(false);
 
 		try {
 			let result: AnalysisResult;
@@ -126,9 +130,12 @@ function SinglePageApp() {
 							data.retryAfter || res.headers.get("Retry-After") || 60,
 						);
 						setRetryCountdown(retrySeconds);
-						throw new Error(
-							`Too many requests. Please wait ${retrySeconds} second${Number(retrySeconds) === 1 ? "" : "s"} before analyzing another schematic.`,
+						setIsRateLimited(true);
+						setErrorMessage(
+							"Too many requests. Please wait before analyzing another schematic.",
 						);
+						setState("error");
+						return;
 					}
 					throw new Error(
 						data.error || `Analysis failed (Status ${res.status})`,
@@ -170,6 +177,7 @@ function SinglePageApp() {
 		} catch (err: unknown) {
 			console.error("Analysis failed:", err);
 			setIsNonSchematicError(false);
+			setIsRateLimited(false);
 			setErrorMessage(
 				err instanceof Error
 					? err.message
@@ -200,6 +208,7 @@ function SinglePageApp() {
 		setAnalysisResult(null);
 		setErrorMessage(null);
 		setIsNonSchematicError(false);
+		setIsRateLimited(false);
 	};
 
 	return (
@@ -357,6 +366,7 @@ function SinglePageApp() {
 										"An error occurred while processing the schematic."
 									}
 									isNonSchematic={isNonSchematicError}
+									isRateLimited={isRateLimited}
 									retryCountdown={retryCountdown}
 									onTryAgain={() => runAnalysis(selectedSource)}
 									onChooseAnother={resetToIdle}
