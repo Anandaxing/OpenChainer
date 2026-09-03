@@ -89,4 +89,24 @@ export function getClientIp(request: Request): string {
  */
 export function resetRateLimits(): void {
 	hitStore.clear();
+	lastLogStore.clear();
+}
+
+// In-memory logger throttle store: IP -> last logged timestamp
+const lastLogStore = new Map<string, number>();
+
+/**
+ * Throttles server warnings to prevent terminal log flooding during rate limit spikes.
+ */
+export function shouldLogRateLimitWarning(
+	ip: string,
+	throttleMs = 10_000,
+): boolean {
+	const now = Date.now();
+	const lastLog = lastLogStore.get(ip) ?? 0;
+	if (now - lastLog >= throttleMs) {
+		lastLogStore.set(ip, now);
+		return true;
+	}
+	return false;
 }
