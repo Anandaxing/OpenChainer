@@ -1,4 +1,6 @@
 import type React from "react";
+import { FaRegFileImage } from "react-icons/fa";
+import { RiLoopRightLine } from "react-icons/ri";
 
 interface ErrorCardProps {
 	errorMessage: string;
@@ -66,16 +68,16 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({
 				<button
 					type="button"
 					onClick={onTryAgain}
-					className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-colors min-h-[44px]"
+					className="cursor-pointer flex items-center gap-[4px] px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-colors min-h-[44px]"
 				>
-					🔄 Try Again
+					<RiLoopRightLine /> Try Again
 				</button>
 				<button
 					type="button"
 					onClick={onChooseAnother}
-					className="px-4 py-2 text-xs font-semibold rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-300 dark:border-zinc-700 min-h-[44px]"
+					className="cursor-pointer flex items-center gap-[4px] px-4 py-2 text-xs font-semibold rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors border border-zinc-300 dark:border-zinc-700 min-h-[44px]"
 				>
-					📁 Choose Another File
+					<FaRegFileImage /> Choose Another File
 				</button>
 			</div>
 		</div>

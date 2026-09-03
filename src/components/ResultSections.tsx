@@ -1,10 +1,10 @@
 import type React from "react";
 import { useState } from "react";
-import type { AnalysisResult } from "../types";
-import { FiCopy } from "react-icons/fi";
-import { LuCopyCheck } from "react-icons/lu";
-import { LuFileJson } from "react-icons/lu";
 import { AiOutlineMessage } from "react-icons/ai";
+import { FiCopy } from "react-icons/fi";
+import { LuCopyCheck, LuFileJson } from "react-icons/lu";
+import { RiLoopRightLine } from "react-icons/ri";
+import type { AnalysisResult } from "../types";
 
 interface ResultPanelProps {
 	result: AnalysisResult;
@@ -100,9 +100,9 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 						<button
 							type="button"
 							onClick={onReanalyze}
-							className="px-3 py-1.5 text-xs font-medium bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-300 dark:border-emerald-500/30 min-h-[44px]"
+							className="flex items-center gap-[4px] px-3 py-1.5 text-xs font-medium bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-300 dark:border-emerald-500/30 min-h-[44px]"
 						>
-							🔄 Reanalyze
+							<RiLoopRightLine /> Reanalyze
 						</button>
 					)}
 				</div>
@@ -229,11 +229,15 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 						onClick={handleCopySummary}
 						className="cursor-pointer px-3 py-2 rounded-lg bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-xs font-medium text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5 transition-colors min-h-[44px] shadow-sm dark:shadow-none"
 					>
-						{copied ? (<>
-							<LuCopyCheck /> Copied
-						</>) : (<>
-							<FiCopy /> Copy Analysis
-						</>)}
+						{copied ? (
+							<>
+								<LuCopyCheck /> Copied
+							</>
+						) : (
+							<>
+								<FiCopy /> Copy Analysis
+							</>
+						)}
 					</button>
 					<button
 						type="button"
@@ -251,7 +255,9 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({
 						type="button"
 						className="px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-xs font-medium text-zinc-400 dark:text-zinc-500 cursor-not-allowed flex items-center gap-2 min-h-[44px]"
 					>
-						<span className="flex items-center gap-[4px]"><AiOutlineMessage /> Ask AI Assistant</span>
+						<span className="flex items-center gap-[4px]">
+							<AiOutlineMessage /> Ask AI Assistant
+						</span>
 						<span className="px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded">
 							Coming soon...
 						</span>
