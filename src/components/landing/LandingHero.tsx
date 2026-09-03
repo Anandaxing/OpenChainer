@@ -64,7 +64,7 @@ export const LandingHero: React.FC = () => {
 
 				{/* Secondary Button: Contribute */}
 				<a
-					href="https://github.com/Anandaxing/open-chainer"
+					href="https://github.com/Anandaxing/OpenChainer"
 					target="_blank"
 					rel="noopener noreferrer"
 					className="px-6 py-3.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/90 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700/80 font-semibold text-sm transition-colors min-h-[44px] flex items-center justify-center gap-2.5 shadow-sm"

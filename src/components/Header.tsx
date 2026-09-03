@@ -24,7 +24,7 @@ export const Header: React.FC = () => {
 									</span>
 								</h1>
 								<span className="px-2 py-0.5 text-[10px] uppercase font-mono font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded">
-									Workbench v1.0
+									Workbench v1.0.0
 								</span>
 							</div>
 							<p className="text-xs text-zinc-600 dark:text-zinc-400 hidden sm:block">
