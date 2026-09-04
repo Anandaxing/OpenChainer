@@ -1,0 +1,16 @@
+# ==============================================================================
+# OpenChainer — Circuit Schematic & PCB Analyzer
+# Website: https://open-chainer.vercel.app
+# ==============================================================================
+
+User-agent: *
+Allow: /
+
+# Disallow API and internal backend endpoints
+Disallow: /api/
+
+# Host directive
+Host: https://open-chainer.vercel.app
+
+# XML Sitemap location
+Sitemap: https://open-chainer.vercel.app/sitemap.xml

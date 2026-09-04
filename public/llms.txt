@@ -1,0 +1,17 @@
+# OpenChainer
+
+> Open-source AI-powered circuit schematic and PCB analyzer.
+
+- Website: https://open-chainer.vercel.app
+- Repository: https://github.com/Anandaxing/OpenChainer
+- Tech Stack: TanStack Start, React 19, Tailwind CSS v4, Google Gemini / Groq / OpenRouter
+
+## Overview
+OpenChainer is an open-source diagnostics workbench for hardware engineers and hobbyists. It uses multimodal LLMs (Google Gemini 2.5/Flash, Groq LPU Vision, and OpenRouter free tiers) to inspect circuit schematics and PCB images, trace signals, detect components, identify anomalies, and verify design connectivity in real time.
+
+## Key Capabilities
+- **Multimodal Visual Inspection**: Analyzes schematic diagrams and PCB photographs.
+- **Component & Net Extraction**: Identifies resistors, ICs, microcontrollers, test points, and net connections.
+- **Multi-Provider Fallback Pipeline**: Resilient architecture cascading Gemini -> Groq -> OpenRouter to prevent downtime.
+- **Deduplication & Cache Layer**: Supabase PostgreSQL caching indexed by perceptual image hashes to avoid duplicate API calls.
+- **Interactive Workbench**: Real-time progress stepper, zoomable inspection viewer, and history management.

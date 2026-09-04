@@ -18,13 +18,85 @@ export const Route = createRootRoute({
 			},
 			{
 				name: "viewport",
-				content: "width=device-width, initial-scale=1, maximum-scale=1",
+				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "OpenChainer — Circuit Schematic Analyzer",
+				title: "OpenChainer — AI Circuit Schematic & PCB Analyzer",
+			},
+			{
+				name: "description",
+				content:
+					"Open-source AI-powered circuit schematic and PCB analyzer. Upload schematics or PCB photos for real-time net tracing, component detection, and anomaly checks.",
+			},
+			{
+				name: "keywords",
+				content:
+					"circuit schematic analyzer, PCB analyzer, AI circuit analysis, electronics diagnostics, electronics workbench, open-source hardware, multimodal LLM, Gemini AI",
+			},
+			{
+				name: "author",
+				content: "Ananda Adiputra",
+			},
+			{
+				name: "theme-color",
+				content: "#09090b",
+			},
+			// Open Graph / Facebook
+			{
+				property: "og:type",
+				content: "website",
+			},
+			{
+				property: "og:url",
+				content: "https://open-chainer.vercel.app/",
+			},
+			{
+				property: "og:title",
+				content: "OpenChainer — AI Circuit Schematic & PCB Analyzer",
+			},
+			{
+				property: "og:description",
+				content:
+					"Open-source visual AI diagnostics for circuits and PCBs. Instant component identification, net analysis, and design verification.",
+			},
+			{
+				property: "og:image",
+				content:
+					"https://open-chainer.vercel.app/assets/images/open_chainer_thumbnail.svg",
+			},
+			{
+				property: "og:image:alt",
+				content: "OpenChainer Workbench Preview",
+			},
+			{
+				property: "og:site_name",
+				content: "OpenChainer",
+			},
+			// Twitter / X
+			{
+				name: "twitter:card",
+				content: "summary_large_image",
+			},
+			{
+				name: "twitter:title",
+				content: "OpenChainer — AI Circuit Schematic & PCB Analyzer",
+			},
+			{
+				name: "twitter:description",
+				content:
+					"Open-source visual AI diagnostics for circuits and PCBs. Instant component identification, net analysis, and design verification.",
+			},
+			{
+				name: "twitter:image",
+				content:
+					"https://open-chainer.vercel.app/assets/images/open_chainer_thumbnail.svg",
 			},
 		],
 		links: [
+			{
+				rel: "canonical",
+				href: "https://open-chainer.vercel.app/",
+			},
 			{
 				rel: "icon",
 				type: "image/svg+xml",
@@ -46,6 +118,31 @@ export const Route = createRootRoute({
 			{
 				rel: "stylesheet",
 				href: appCss,
+			},
+		],
+		scripts: [
+			{
+				type: "application/ld+json",
+				children: JSON.stringify({
+					"@context": "https://schema.org",
+					"@type": "WebApplication",
+					name: "OpenChainer",
+					url: "https://open-chainer.vercel.app/",
+					description:
+						"Open-source AI-powered circuit schematic and PCB analyzer. Upload schematics or PCB images for real-time net tracing, component detection, and anomaly checks.",
+					applicationCategory: "DeveloperApplication",
+					operatingSystem: "Any",
+					offers: {
+						"@type": "Offer",
+						price: "0",
+						priceCurrency: "USD",
+					},
+					author: {
+						"@type": "Person",
+						name: "Ananda Adiputra",
+						url: "https://github.com/Anandaxing",
+					},
+				}),
 			},
 		],
 	}),
@@ -91,12 +188,12 @@ function NotFoundComponent() {
 								className="w-full h-full object-contain"
 							/>
 						</div>
-						<h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
+						<span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
 							Open
 							<span className="text-emerald-500 dark:text-emerald-300 font-mono font-bold">
 								Chainer
 							</span>
-						</h1>
+						</span>
 					</Link>
 				</div>
 			</header>

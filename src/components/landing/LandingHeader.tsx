@@ -25,12 +25,12 @@ export const LandingHeader: React.FC = () => {
 					</div>
 					<div>
 						<div className="flex items-center gap-2">
-							<h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
+							<span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100 font-mono">
 								Open
 								<span className="text-emerald-500 dark:text-emerald-300 font-mono font-bold">
 									Chainer
 								</span>
-							</h1>
+							</span>
 							<span className="px-2 py-0.5 text-[10px] uppercase font-mono font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded">
 								v1.0.0
 							</span>
