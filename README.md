@@ -277,11 +277,12 @@ OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 In your Supabase project dashboard, navigate to the **SQL Editor** and run:
 
 ```sql
-create table if not exists analyses (
+create table analyses (
   id uuid primary key default gen_random_uuid(),
-  image_hash text unique not null,
+  image_hash text not null unique,
   result jsonb not null,
-  created_at timestamptz default now()
+  thumbnail_url text,
+  created_at timestamptz not null default now()
 );
 
 -- Index for instant hash lookups
@@ -424,10 +425,6 @@ Contributions are welcome! Whether you want to improve prompt engineering, add n
 6. **Open a Pull Request**
 
 ---
-
-## 📄 License
-
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 <div align="center">
 
