@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { purgeExpiredAnalyses } from "../../../lib/cleanup";
 import { logErrorOnce, logWarningOnce } from "../../../lib/serverLogger";
-import { supabase } from "../../../lib/supabase";
 
 export const Route = createFileRoute("/api/cron/cleanup")({
 	server: {
@@ -19,35 +19,14 @@ export const Route = createFileRoute("/api/cron/cleanup")({
 				}
 
 				try {
-					// 2. Compute 7-day retention cutoff timestamp
-					const cutoff = new Date(
-						Date.now() - 7 * 24 * 60 * 60 * 1000,
-					).toISOString();
-
-					// 3. Delete records older than 7 days
-					const { error, count } = await supabase
-						.from("analyses")
-						.delete({ count: "exact" })
-						.lt("created_at", cutoff);
-
-					if (error) {
-						logErrorOnce(
-							"cleanup-cron-error",
-							"Supabase 7-day cleanup error:",
-							error,
-						);
-						return Response.json({ error: error.message }, { status: 500 });
-					}
+					// 2. Execute 7-day purging operation
+					const result = await purgeExpiredAnalyses();
 
 					console.log(
-						`[Maintenance] Purged ${count ?? 0} analyses older than 7 days (cutoff: ${cutoff}).`,
+						`[Maintenance] Purged ${result.purgedRecords} analyses older than 7 days (cutoff: ${result.cutoffTimestamp}).`,
 					);
 
-					return Response.json({
-						success: true,
-						purgedRecords: count ?? 0,
-						cutoffTimestamp: cutoff,
-					});
+					return Response.json(result);
 				} catch (err: unknown) {
 					const message =
 						err instanceof Error ? err.message : "Unknown error during cleanup";
