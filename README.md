@@ -4,7 +4,7 @@
 
 # ⚡ OPENCHAINER
 
-v1.0.0 (first release)
+v1.0.1 (latest release)
 Visit website: <a href="https://openchainer.vercel.app/" target="_blank">https://openchainer.vercel.app/</a>
 
 **An open-source, resilient AI tool for analyzing electrical schematics and circuit diagrams**
@@ -80,6 +80,11 @@ By coupling a **SHA-256 content-based deduplication cache** (backed by Supabase)
   - One-click sample test preset (NE555 Timer Circuit).
   - Responsive design with dark and light theme support.
   - Local client-side history with lightweight WebP thumbnails.
+
+- 🧹 **Automatic 7-Day Database Cleaning & Retention**:
+  - Automated database pruning cycle permanently clears analysis cache records older than 7 days via PostgreSQL `pg_cron` and Vercel Cron (`/api/cron/cleanup`).
+  - Prevents unbounded database growth, protects hardware IP privacy, and ensures schematics are re-evaluated against newer vision models.
+  - Read-time TTL filtering (`.gte("created_at", sevenDaysCutoff)`) guarantees expired records are never served as cache hits.
 
 ---
 
@@ -427,7 +432,12 @@ curl -X POST http://localhost:3000/api/analyze \
 ---
 
 ## 📦 Version History / Changelog
-- **v1.0.0** (Current)
+- **v1.0.1** (Current)
+  - **Automated 7-Day Database Cleaning**: Native PostgreSQL `pg_cron` scheduled job and authenticated `/api/cron/cleanup` endpoint to purge analysis cache records older than 7 days.
+  - **Read-Time Cache TTL**: Enforced 7-day TTL cutoff in `POST /api/analyze` to avoid serving stale cached interpretations.
+  - **Conflict-Safe Upsert**: Switched cache writes to `.upsert()` with `onConflict: "image_hash"` to eliminate write collisions on concurrent uploads.
+  - **Automated Unit Test Suite**: Added 15 comprehensive unit tests (`npm run test`) validating cutoff calculations, TTL filtering decisions, Supabase bulk deletion query mocking, and authorization.
+- **v1.0.0**
   - First release with TanStack Start & React 19.
 
 ---
