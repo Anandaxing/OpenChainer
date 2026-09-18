@@ -56,11 +56,16 @@ export const Route = createFileRoute("/api/analyze")({
 					// 🆕 1. Hash the image CONTENT
 					const imageHash = createHash("sha256").update(buffer).digest("hex");
 
-					// 🆕 2. Cache lookup — before calling Gemini
+					// 🆕 2. Cache lookup — before calling Gemini (enforce 7-day TTL cutoff)
+					const sevenDaysCutoff = new Date(
+						Date.now() - 7 * 24 * 60 * 60 * 1000,
+					).toISOString();
+
 					const { data: cached, error: lookupError } = await supabase
 						.from("analyses")
 						.select("result")
 						.eq("image_hash", imageHash)
+						.gte("created_at", sevenDaysCutoff)
 						.maybeSingle();
 
 					if (lookupError) {
@@ -90,10 +95,13 @@ export const Route = createFileRoute("/api/analyze")({
 					normalized.filename = image.name;
 					normalized.analyzedAt = new Date().toISOString();
 
-					// 🆕 4. Save to cache (non-fatal on failure)
+					// 🆕 4. Save to cache (conflict-safe upsert, non-fatal on failure)
 					const { error: insertError } = await supabase
 						.from("analyses")
-						.insert({ image_hash: imageHash, result: normalized });
+						.upsert(
+							{ image_hash: imageHash, result: normalized },
+							{ onConflict: "image_hash" },
+						);
 
 					if (insertError) {
 						logErrorOnce(

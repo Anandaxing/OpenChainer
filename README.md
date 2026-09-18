@@ -287,7 +287,39 @@ create table analyses (
 
 -- Index for instant hash lookups
 create index if not exists idx_analyses_image_hash on analyses(image_hash);
+
+-- Index on created_at for fast 7-day retention range queries & deletions
+create index if not exists idx_analyses_created_at on analyses(created_at);
+
+-- Tune autovacuum to reclaim deleted space rapidly without table bloat
+alter table analyses set (
+  autovacuum_vacuum_scale_factor = 0.05,
+  autovacuum_vacuum_cost_limit = 500,
+  autovacuum_vacuum_threshold = 100
+);
 ```
+
+#### Automated 7-Day Retention Policy
+
+To prevent database bloat and respect circuit design privacy, OpenChainer implements an **automated 7-day data retention cycle**.
+
+You can enable native daily purging in PostgreSQL via `pg_cron` (run in Supabase SQL Editor):
+
+```sql
+-- Enable pg_cron and schedule daily purge at 03:00 UTC
+create extension if not exists pg_cron;
+grant usage on schema cron to postgres;
+
+select cron.schedule(
+  'purge-analyses-7-days',
+  '0 3 * * *',
+  $$delete from public.analyses where created_at < now() - interval '7 days'$$
+);
+```
+
+> **Full migration script:** [`supabase/migrations/20260918_purge_old_analyses_7d.sql`](supabase/migrations/20260918_purge_old_analyses_7d.sql)  
+> **Vercel Cron Fallback:** OpenChainer also provides an authenticated endpoint at `GET /api/cron/cleanup` preconfigured in `vercel.json` to purge expired records daily.
+
 
 ### Development Server
 
