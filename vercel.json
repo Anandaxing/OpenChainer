@@ -5,5 +5,13 @@
 			"path": "/api/cron/cleanup",
 			"schedule": "0 3 * * *"
 		}
-	]
+	],
+	"functions": {
+		"api/**/*.ts": {
+			"maxDuration": 60
+		},
+		"src/routes/api/**/*.ts": {
+			"maxDuration": 60
+		}
+	}
 }

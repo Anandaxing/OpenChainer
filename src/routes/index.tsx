@@ -114,20 +114,52 @@ function SinglePageApp() {
 			}
 
 			if (fileToUpload) {
+				// Client-side payload size guard: Vercel serverless request body is capped at 4.5MB
+				if (fileToUpload.size > 4.5 * 1024 * 1024) {
+					setIsNonSchematicError(false);
+					setIsRateLimited(false);
+					setErrorMessage(
+						`Image size (${(fileToUpload.size / (1024 * 1024)).toFixed(1)}MB) exceeds the 4.5MB cloud processing limit. Please resize or compress the image.`,
+					);
+					setState("error");
+					return;
+				}
+
 				setState("analyzing");
 				const formData = new FormData();
 				formData.append("image", fileToUpload);
 
-				const res = await fetch("/api/analyze", {
-					method: "POST",
-					body: formData,
-				});
+				let res: Response;
+				try {
+					res = await fetch("/api/analyze", {
+						method: "POST",
+						body: formData,
+					});
+				} catch {
+					throw new Error(
+						"Network connection lost. Please check your internet connection and try again.",
+					);
+				}
 
-				const data = await res.json();
+				// Safely inspect response format before attempting to parse as JSON
+				const contentType = res.headers.get("content-type") || "";
+				let data: any = null;
+				let rawText = "";
+
+				if (contentType.includes("application/json")) {
+					try {
+						data = await res.json();
+					} catch {
+						rawText = await res.text().catch(() => "");
+					}
+				} else {
+					rawText = await res.text().catch(() => "");
+				}
+
 				if (!res.ok) {
 					if (res.status === 429) {
 						const retrySeconds = Number(
-							data.retryAfter || res.headers.get("Retry-After") || 60,
+							data?.retryAfter || res.headers.get("Retry-After") || 60,
 						);
 						setRetryCountdown(retrySeconds);
 						setIsRateLimited(true);
@@ -137,10 +169,35 @@ function SinglePageApp() {
 						setState("error");
 						return;
 					}
+
+					if (res.status === 413) {
+						throw new Error(
+							"The uploaded image exceeds the maximum payload size (4.5MB). Please upload a smaller schematic.",
+						);
+					}
+
+					if (res.status === 504 || res.status === 502) {
+						throw new Error(
+							"Analysis timed out while processing with AI vision providers. Please try again with a clear, smaller schematic.",
+						);
+					}
+
+					const errorDetail =
+						data?.error ||
+						(rawText && !rawText.startsWith("<") && rawText.length < 250
+							? rawText
+							: null) ||
+						`Analysis failed (Server returned status ${res.status}). Please try again.`;
+
+					throw new Error(errorDetail);
+				}
+
+				if (!data || typeof data !== "object") {
 					throw new Error(
-						data.error || `Analysis failed (Status ${res.status})`,
+						"The server returned an invalid or empty response format. Please try again.",
 					);
 				}
+
 				result = data;
 			} else {
 				// Sample preset image fallback

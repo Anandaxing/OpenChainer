@@ -198,6 +198,7 @@ async function analyzeWithGemini(
 							response_mime_type: "application/json",
 						},
 					}),
+					signal: AbortSignal.timeout(20000),
 				});
 
 				if (!res.ok) {
@@ -310,6 +311,7 @@ async function analyzeWithGroq(
 					],
 					// Note: response_format is omitted because Groq vision models do not support json_object
 				}),
+				signal: AbortSignal.timeout(20000),
 			});
 
 			if (!res.ok) {
@@ -417,6 +419,7 @@ async function analyzeWithOpenRouter(
 					],
 					// Note: response_format is omitted for maximum open-weights model compatibility
 				}),
+				signal: AbortSignal.timeout(20000),
 			});
 
 			if (!res.ok) {

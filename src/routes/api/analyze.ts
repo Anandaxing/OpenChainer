@@ -5,6 +5,23 @@ import { checkRateLimit, getClientIp } from "../../lib/rateLimit";
 import { logErrorOnce, logWarningOnce } from "../../lib/serverLogger";
 import { supabase } from "../../lib/supabase";
 
+async function withTimeout<T>(
+	promise: PromiseLike<T>,
+	ms: number,
+	fallback: T,
+): Promise<T> {
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	const timeoutPromise = new Promise<T>((resolve) => {
+		timer = setTimeout(() => resolve(fallback), ms);
+	});
+
+	try {
+		return await Promise.race([promise, timeoutPromise]);
+	} finally {
+		if (timer) clearTimeout(timer);
+	}
+}
+
 export const Route = createFileRoute("/api/analyze")({
 	server: {
 		handlers: {
@@ -33,7 +50,19 @@ export const Route = createFileRoute("/api/analyze")({
 						);
 					}
 
-					const formData = await request.formData();
+					let formData: FormData;
+					try {
+						formData = await request.formData();
+					} catch {
+						return Response.json(
+							{
+								error:
+									"Failed to parse upload form data. The image may be corrupted or oversized.",
+							},
+							{ status: 400 },
+						);
+					}
+
 					const image = formData.get("image");
 
 					if (!image || !(image instanceof File)) {
@@ -56,17 +85,21 @@ export const Route = createFileRoute("/api/analyze")({
 					// 🆕 1. Hash the image CONTENT
 					const imageHash = createHash("sha256").update(buffer).digest("hex");
 
-					// 🆕 2. Cache lookup — before calling Gemini (enforce 7-day TTL cutoff)
+					// 🆕 2. Cache lookup — before calling Gemini (enforce 7-day TTL cutoff with 3s timeout)
 					const sevenDaysCutoff = new Date(
 						Date.now() - 7 * 24 * 60 * 60 * 1000,
 					).toISOString();
 
-					const { data: cached, error: lookupError } = await supabase
-						.from("analyses")
-						.select("result")
-						.eq("image_hash", imageHash)
-						.gte("created_at", sevenDaysCutoff)
-						.maybeSingle();
+					const { data: cached, error: lookupError } = await withTimeout(
+						supabase
+							.from("analyses")
+							.select("result")
+							.eq("image_hash", imageHash)
+							.gte("created_at", sevenDaysCutoff)
+							.maybeSingle(),
+						3000,
+						{ data: null, error: null },
+					);
 
 					if (lookupError) {
 						logErrorOnce(
@@ -95,13 +128,17 @@ export const Route = createFileRoute("/api/analyze")({
 					normalized.filename = image.name;
 					normalized.analyzedAt = new Date().toISOString();
 
-					// 🆕 4. Save to cache (conflict-safe upsert, non-fatal on failure)
-					const { error: insertError } = await supabase
-						.from("analyses")
-						.upsert(
-							{ image_hash: imageHash, result: normalized },
-							{ onConflict: "image_hash" },
-						);
+					// 🆕 4. Save to cache (conflict-safe upsert, non-fatal on failure, 3s timeout)
+					const { error: insertError } = await withTimeout(
+						supabase
+							.from("analyses")
+							.upsert(
+								{ image_hash: imageHash, result: normalized },
+								{ onConflict: "image_hash" },
+							),
+						3000,
+						{ error: null },
+					);
 
 					if (insertError) {
 						logErrorOnce(
