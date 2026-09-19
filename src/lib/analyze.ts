@@ -1,6 +1,11 @@
-import type { AnalysisResult } from "./types";
+import type {
+	AnalysisResult,
+	CircuitHazard,
+	CircuitTradeoffs,
+	OperationalCycleStage,
+} from "./types";
 
-const PROMPT = `You are an expert electrical engineer and schematic diagram analyzer.
+const PROMPT = `You are an expert electrical engineer, PCB designer, and circuit safety inspector.
 Analyze the provided image carefully and determine if it is an electrical/electronic schematic diagram, circuit layout, or PCB trace diagram.
 
 If it is NOT a schematic diagram or PCB layout (e.g., photo of a cat, person, landscape, general object, logo icon):
@@ -9,22 +14,84 @@ If it is NOT a schematic diagram or PCB layout (e.g., photo of a cat, person, la
 - Fill other fields with concise explanatory placeholders.
 
 If it IS a schematic or PCB diagram, follow these steps strictly:
-1. LIST every component (e.g. resistors, capacitors, ICs, transistors, MOSFETs, diodes, switches, connectors) with their names, designators (e.g. R1, Q1, U1), quantity, and functional description.
-2. LOCATE power source(s) (e.g. 5V USB, 12V DC Adapter, 9V Battery, AC Mains, Voltage Regulator). Specify source name, voltage if labeled, and operational notes.
-3. TRACE power path — identify AC regions (alternating current, transformer primaries, mains) and DC regions (direct current, rectified rails, logic supply lines) with detailed engineering reasoning.
-4. EXPLAIN the circuit function in clear, plain language (both a concise summary and a detailed explanation).
-5. FLAG any uncertainties — if any trace, connection, or label is blurry, ambiguous, or unreadable, list it explicitly under uncertainties. NEVER invent unverified connections.
+1. IDENTIFY COMPONENTS & PURPOSE:
+   - For EVERY component (resistors, capacitors, ICs, transistors, MOSFETs, diodes, inductors, transformers, switches, connectors):
+     * "name": Component type/name (e.g. "N-Channel Power MOSFET", "Electrolytic Smoothing Capacitor").
+     * "designator": Label found on schematic (e.g. R1, Q1, U1, C2).
+     * "quantity": Count.
+     * "purpose": State the EXACT functional purpose of this specific component in this circuit topology.
+     * "details": Array of 2 to 4 bullet points detailing operational role, node connections (which pins or nets it connects to), and labeled value/rating (e.g. "10kΩ 1/4W", "100µF 50V").
+     * "failureConsequence": Brief statement on what happens if this component fails, shorts, or opens.
+
+2. OPERATIONAL CYCLE ("How This Circuit Operates"):
+   - Deconstruct the circuit function into a sequential, cyclic 3-to-5 stage operational process:
+     * Stage 1: Power Input & Conditioning (inrush limiting, fuse protection, rectifying, filter charging)
+     * Stage 2: Switching, Oscillation, or Biasing (gate drive, base injection, PWM startup, IC enable)
+     * Stage 3: Energy Transfer / Amplification (inductive storage, transformer primary flux, signal amplification)
+     * Stage 4: Rectification & Output Delivery (freewheeling, secondary rectification, filtering, load delivery)
+     * Stage 5: Regulation, Feedback & Protection Loop (voltage sensing, optocoupler/divider feedback, duty cycle modulation closing the cycle)
+   - For each stage provide: "stageNumber", "name", "description" (clear operational explanation), "inputState", "outputState", and "keyComponents" (array of component designators).
+
+3. ADVANTAGES & DISADVANTAGES:
+   - "advantages": Array of 3 to 5 concise points defining engineering strengths (e.g. high efficiency, galvanic isolation, low component count, low BOM cost, wide input tolerance).
+   - "disadvantages": Array of 3 to 5 concise points defining engineering limitations (e.g. high EMI emissions, output voltage ripple, lack of short-circuit protection, high switch voltage stress, thermal dissipation).
+
+4. HAZARD & SAFETY WARNINGS:
+   - Identify which parts are dangerous and can cause hazards:
+     * "severity": "critical" | "warning" | "caution"
+     * "category": "high_voltage_shock" | "stored_energy" | "thermal_burn" | "fire_overcurrent" | "isolation_breach" | "other"
+     * "location": Specific component or node (e.g. "AC Mains Input Terminals & Bridge Rectifier", "Bulk Filter Capacitor C1", "MOSFET Q1 Heatsink")
+     * "description": Specific hazard description (e.g. "Lethal 120V/230V AC shock hazard with exposed conductors", "Retains >300V DC dangerous charge after power disconnection")
+     * "mitigation": Actionable safe handling or mitigation advice (e.g. "Use isolation transformer during testing; discharge capacitor through a 10k resistor before servicing").
+
+5. POWER & DOMAIN MAPPING:
+   - Locate power source(s) and voltage.
+   - Trace power path into AC regions and DC regions with engineering reasoning.
+
+6. UNCERTAINTIES & CAVEATS:
+   - Flag any blurry traces, unreadable values, or unverified pinouts under "uncertainties". NEVER invent unverified connections.
 
 Output MUST be strictly valid JSON matching this schema:
 {
   "isSchematic": boolean,
   "summary": "string",
   "components": [
-    { "name": "string", "designator": "string", "quantity": number, "description": "string" }
+    {
+      "name": "string",
+      "designator": "string",
+      "quantity": number,
+      "purpose": "string",
+      "details": ["string"],
+      "failureConsequence": "string",
+      "description": "string"
+    }
   ],
   "power": { "source": "string", "voltage": "string", "notes": "string" },
   "acRegions": [ { "location": "string", "reasoning": "string" } ],
   "dcRegions": [ { "location": "string", "reasoning": "string" } ],
+  "operationalCycle": [
+    {
+      "stageNumber": number,
+      "name": "string",
+      "description": "string",
+      "inputState": "string",
+      "outputState": "string",
+      "keyComponents": ["string"]
+    }
+  ],
+  "tradeoffs": {
+    "advantages": ["string"],
+    "disadvantages": ["string"]
+  },
+  "hazards": [
+    {
+      "severity": "critical" | "warning" | "caution",
+      "category": "string",
+      "location": "string",
+      "description": "string",
+      "mitigation": "string"
+    }
+  ],
   "explanation": "string",
   "uncertainties": [ "string" ]
 }`;
@@ -102,6 +169,58 @@ export function normalizeAnalysisResult(
 	const powerVoltage = raw.power?.voltage || raw.powerSource?.voltage || "N/A";
 
 	const cachedValue = raw.cached ?? raw.isCached ?? false;
+	const explanationText =
+		raw.explanation || raw.educationDetail || raw.summary || "";
+
+	// Robust operational cycle fallback
+	const operationalCycle: OperationalCycleStage[] =
+		Array.isArray(raw.operationalCycle) && raw.operationalCycle.length > 0
+			? raw.operationalCycle.map((stage, idx) => ({
+					stageNumber: stage.stageNumber ?? idx + 1,
+					name: stage.name || `Operational Stage ${idx + 1}`,
+					description: stage.description || "Active circuit operation.",
+					inputState: stage.inputState || undefined,
+					outputState: stage.outputState || undefined,
+					keyComponents: Array.isArray(stage.keyComponents)
+						? stage.keyComponents
+						: undefined,
+				}))
+			: [
+					{
+						stageNumber: 1,
+						name: "Primary Operation",
+						description:
+							explanationText ||
+							"Circuit operates according to standard schematic topology.",
+					},
+				];
+
+	// Robust tradeoffs fallback
+	const tradeoffs: CircuitTradeoffs = {
+		advantages: Array.isArray(raw.tradeoffs?.advantages)
+			? raw.tradeoffs.advantages.filter(Boolean)
+			: [],
+		disadvantages: Array.isArray(raw.tradeoffs?.disadvantages)
+			? raw.tradeoffs.disadvantages.filter(Boolean)
+			: [],
+	};
+
+	// Robust hazards fallback
+	const hazards: CircuitHazard[] = Array.isArray(raw.hazards)
+		? raw.hazards.map((h) => ({
+				severity:
+					h.severity === "critical" ||
+					h.severity === "warning" ||
+					h.severity === "caution"
+						? h.severity
+						: "warning",
+				category: h.category || "other",
+				location: h.location || "General Circuit",
+				description: h.description || "Potential electrical hazard.",
+				mitigation:
+					h.mitigation || "Follow standard laboratory safety procedures.",
+			}))
+		: [];
 
 	return {
 		id: raw.id || `analysis-${Date.now()}`,
@@ -113,12 +232,25 @@ export function normalizeAnalysisResult(
 		isCached: cachedValue,
 		provider: raw.provider || "Gemini AI",
 		summary: raw.summary || "No summary provided.",
-		components: (raw.components || []).map((c) => ({
-			name: c.name || "Unknown Component",
-			designator: c.designator || "—",
-			quantity: c.quantity || 1,
-			description: c.description || "",
-		})),
+		components: (raw.components || []).map((c) => {
+			const desc = c.description || "";
+			const purpose = c.purpose || desc || "Circuit component";
+			const details =
+				Array.isArray(c.details) && c.details.length > 0
+					? c.details
+					: desc
+						? [desc]
+						: [];
+			return {
+				name: c.name || "Unknown Component",
+				designator: c.designator || "—",
+				quantity: c.quantity || 1,
+				description: desc || purpose,
+				purpose,
+				details,
+				failureConsequence: c.failureConsequence || undefined,
+			};
+		}),
 		power: raw.power || {
 			source: powerSourceType,
 			voltage: powerVoltage,
@@ -126,7 +258,7 @@ export function normalizeAnalysisResult(
 		},
 		acRegions: raw.acRegions || [],
 		dcRegions: raw.dcRegions || [],
-		explanation: raw.explanation || raw.educationDetail || "",
+		explanation: explanationText,
 		uncertainties: raw.uncertainties || [],
 		powerSource: {
 			type: powerSourceType,
@@ -136,8 +268,10 @@ export function normalizeAnalysisResult(
 			acDetails: acText,
 			dcDetails: dcText,
 		},
-		educationDetail:
-			raw.explanation || raw.educationDetail || raw.summary || "",
+		educationDetail: explanationText,
+		operationalCycle,
+		tradeoffs,
+		hazards,
 		analyzedAt: raw.analyzedAt || new Date().toISOString(),
 	};
 }
@@ -473,6 +607,30 @@ async function analyzeWithOpenRouter(
 // -----------------------------------------------------------------------------
 // Orchestrator: Multi-Provider Fallback Chain (Gemini -> Groq -> OpenRouter)
 // -----------------------------------------------------------------------------
+
+export function getLLMProvidersAvailability(): import("./types").LLMProviderStatus[] {
+	return [
+		{
+			providerName: "Google Gemini",
+			isConfigured: Boolean(getEnvVar("GEMINI_API_KEY")),
+			activeModel: GEMINI_CANDIDATE_MODELS[0],
+			status: getEnvVar("GEMINI_API_KEY") ? "operational" : "unavailable",
+		},
+		{
+			providerName: "Groq LPU",
+			isConfigured: Boolean(getEnvVar("GROQ_API_KEY")),
+			activeModel: GROQ_CANDIDATE_MODELS[0],
+			status: getEnvVar("GROQ_API_KEY") ? "operational" : "unavailable",
+		},
+		{
+			providerName: "OpenRouter",
+			isConfigured: Boolean(getEnvVar("OPENROUTER_API_KEY")),
+			activeModel: OPENROUTER_CANDIDATE_MODELS[0],
+			status: getEnvVar("OPENROUTER_API_KEY") ? "operational" : "unavailable",
+		},
+	];
+}
+
 export async function analyzeSchematic(
 	base64: string,
 	mimeType: string,
@@ -480,40 +638,66 @@ export async function analyzeSchematic(
 	const errors: string[] = [];
 
 	// Step 1: Attempt Google Gemini (Primary)
-	try {
+	const geminiKey = getEnvVar("GEMINI_API_KEY");
+	if (geminiKey) {
+		try {
+			console.log(
+				"[Fallback Pipeline] Attempting Primary Provider: Google Gemini",
+			);
+			return await analyzeWithGemini(base64, mimeType);
+		} catch (geminiError: unknown) {
+			const msg =
+				geminiError instanceof Error ? geminiError.message : String(geminiError);
+			console.warn("[Fallback Pipeline] Primary Gemini failed:", msg);
+			errors.push(`Gemini: ${msg}`);
+		}
+	} else {
 		console.log(
-			"[Fallback Pipeline] Attempting Primary Provider: Google Gemini",
+			"[Fallback Pipeline] Gemini not configured (no GEMINI_API_KEY), skipping.",
 		);
-		return await analyzeWithGemini(base64, mimeType);
-	} catch (geminiError: unknown) {
-		const msg =
-			geminiError instanceof Error ? geminiError.message : String(geminiError);
-		console.warn("[Fallback Pipeline] Primary Gemini failed:", msg);
-		errors.push(`Gemini: ${msg}`);
+		errors.push("Gemini: GEMINI_API_KEY environment variable is not configured.");
 	}
 
 	// Step 2: Fallback to Groq (Secondary)
-	try {
-		console.log("[Fallback Pipeline] Attempting Secondary Provider: Groq");
-		return await analyzeWithGroq(base64, mimeType);
-	} catch (groqError: unknown) {
-		const msg =
-			groqError instanceof Error ? groqError.message : String(groqError);
-		console.warn("[Fallback Pipeline] Secondary Groq failed:", msg);
-		errors.push(`Groq: ${msg}`);
+	const groqKey = getEnvVar("GROQ_API_KEY");
+	if (groqKey) {
+		try {
+			console.log("[Fallback Pipeline] Attempting Secondary Provider: Groq");
+			return await analyzeWithGroq(base64, mimeType);
+		} catch (groqError: unknown) {
+			const msg =
+				groqError instanceof Error ? groqError.message : String(groqError);
+			console.warn("[Fallback Pipeline] Secondary Groq failed:", msg);
+			errors.push(`Groq: ${msg}`);
+		}
+	} else {
+		console.log(
+			"[Fallback Pipeline] Groq not configured (no GROQ_API_KEY), skipping.",
+		);
+		errors.push("Groq: GROQ_API_KEY environment variable is not configured.");
 	}
 
 	// Step 3: Fallback to OpenRouter (Tertiary)
-	try {
-		console.log("[Fallback Pipeline] Attempting Tertiary Provider: OpenRouter");
-		return await analyzeWithOpenRouter(base64, mimeType);
-	} catch (openRouterError: unknown) {
-		const msg =
-			openRouterError instanceof Error
-				? openRouterError.message
-				: String(openRouterError);
-		console.warn("[Fallback Pipeline] Tertiary OpenRouter failed:", msg);
-		errors.push(`OpenRouter: ${msg}`);
+	const openRouterKey = getEnvVar("OPENROUTER_API_KEY");
+	if (openRouterKey) {
+		try {
+			console.log("[Fallback Pipeline] Attempting Tertiary Provider: OpenRouter");
+			return await analyzeWithOpenRouter(base64, mimeType);
+		} catch (openRouterError: unknown) {
+			const msg =
+				openRouterError instanceof Error
+					? openRouterError.message
+					: String(openRouterError);
+			console.warn("[Fallback Pipeline] Tertiary OpenRouter failed:", msg);
+			errors.push(`OpenRouter: ${msg}`);
+		}
+	} else {
+		console.log(
+			"[Fallback Pipeline] OpenRouter not configured (no OPENROUTER_API_KEY), skipping.",
+		);
+		errors.push(
+			"OpenRouter: OPENROUTER_API_KEY environment variable is not configured.",
+		);
 	}
 
 	// If all providers in the fallback chain fail
@@ -521,3 +705,4 @@ export async function analyzeSchematic(
 		`All AI Providers Failed. Summary of errors:\n- ${errors.join("\n- ")}`,
 	);
 }
+
