@@ -3,6 +3,9 @@ export interface ComponentItem {
 	designator?: string;
 	quantity?: number;
 	description?: string;
+	purpose?: string;
+	details?: string[];
+	failureConsequence?: string;
 }
 
 export interface PowerInfo {
@@ -24,6 +27,43 @@ export interface PowerSourceInfo {
 export interface AcDcMap {
 	acDetails: string;
 	dcDetails: string;
+}
+
+export interface OperationalCycleStage {
+	stageNumber: number;
+	name: string;
+	description: string;
+	inputState?: string;
+	outputState?: string;
+	keyComponents?: string[];
+}
+
+export interface CircuitTradeoffs {
+	advantages: string[];
+	disadvantages: string[];
+}
+
+export interface CircuitHazard {
+	severity: "critical" | "warning" | "caution";
+	category?:
+		| "high_voltage_shock"
+		| "stored_energy"
+		| "thermal_burn"
+		| "fire_overcurrent"
+		| "isolation_breach"
+		| "other"
+		| string;
+	location: string;
+	description: string;
+	mitigation: string;
+}
+
+export interface LLMProviderStatus {
+	providerName: string;
+	isConfigured: boolean;
+	activeModel?: string;
+	latencyMs?: number;
+	status: "operational" | "degraded" | "unavailable";
 }
 
 export interface AnalysisResult {
@@ -48,4 +88,11 @@ export interface AnalysisResult {
 	powerSource?: PowerSourceInfo;
 	acDcMap?: AcDcMap;
 	educationDetail?: string;
+
+	// Rich Engineering Analysis Additions
+	operationalCycle?: OperationalCycleStage[];
+	tradeoffs?: CircuitTradeoffs;
+	hazards?: CircuitHazard[];
+	providerStatus?: LLMProviderStatus;
 }
+
