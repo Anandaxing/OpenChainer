@@ -290,11 +290,12 @@ function getEnvVar(key: string): string | undefined {
 // -----------------------------------------------------------------------------
 // 1. Google Gemini Provider
 // -----------------------------------------------------------------------------
-const GEMINI_CANDIDATE_MODELS = [
-	"gemini-3.6-flash",
-	"gemini-3.8-flash",
+export const GEMINI_CANDIDATE_MODELS = [
+	"gemini-2.5-flash",
+	"gemini-2.0-flash",
+	"gemini-1.5-flash",
 	"gemini-flash-latest",
-	"gemini-3.5-flash",
+	"gemini-1.5-pro",
 ];
 
 async function analyzeWithGemini(
@@ -338,30 +339,35 @@ async function analyzeWithGemini(
 				if (!res.ok) {
 					lastErrorText = await res.text();
 
-					// Fail-fast on auth, quota, or rate limits to immediately trigger secondary fallback
+					// Fail-fast ONLY on true auth or credentials failure
 					if (
 						res.status === 401 ||
 						res.status === 403 ||
-						res.status === 429 ||
 						(res.status === 400 &&
 							/API_KEY_INVALID|invalid.*api.*key|key.*not.*valid/i.test(
 								lastErrorText,
 							))
 					) {
 						console.warn(
-							`[Gemini Provider] Fatal status ${res.status}, failing fast across all Gemini models: ${lastErrorText}`,
+							`[Gemini Provider] Fatal auth status ${res.status}, failing fast across all Gemini models: ${lastErrorText}`,
 						);
 						throw new Error(
-							`Gemini API fatal error (${res.status}): ${lastErrorText || "Authentication or quota failure"}`,
+							`Gemini API fatal error (${res.status}): ${lastErrorText || "Authentication failure"}`,
 						);
 					}
 
-					if (res.status === 503 && attempt === 0) {
-						await new Promise((r) => setTimeout(r, 1000));
+					// Transient 503 high demand or 429 quota: retry once with backoff before switching models
+					if ((res.status === 503 || res.status === 429) && attempt === 0) {
+						const delay = 1500 + Math.random() * 500;
+						console.warn(
+							`[Gemini Provider] Model ${model} returned status ${res.status}, retrying attempt in ${Math.round(delay)}ms...`,
+						);
+						await new Promise((r) => setTimeout(r, delay));
 						continue;
 					}
+
 					console.warn(
-						`[Gemini Provider] Model ${model} returned status ${res.status}, trying next model...`,
+						`[Gemini Provider] Model ${model} returned status ${res.status}, trying next candidate model...`,
 					);
 					break;
 				}
@@ -400,9 +406,10 @@ async function analyzeWithGemini(
 // -----------------------------------------------------------------------------
 // 2. Groq LPU / Vision Provider
 // -----------------------------------------------------------------------------
-const GROQ_CANDIDATE_MODELS = [
-	"llama-3.2-11b-vision-preview",
+export const GROQ_CANDIDATE_MODELS = [
 	"llama-3.2-90b-vision-preview",
+	"llama-3.2-11b-vision",
+	"meta-llama/llama-4-scout",
 ];
 
 async function analyzeWithGroq(
@@ -451,20 +458,26 @@ async function analyzeWithGroq(
 			if (!res.ok) {
 				lastErrorText = await res.text();
 
-				// Fail-fast on fatal auth, rate limit, or decommissioned errors
-				if (
-					res.status === 401 ||
-					res.status === 403 ||
-					res.status === 429 ||
-					res.status === 404 ||
-					lastErrorText.includes("model_decommissioned")
-				) {
+				// Fail-fast ONLY on true auth credentials failure
+				if (res.status === 401 || res.status === 403) {
 					console.warn(
-						`[Groq Provider] Fatal status ${res.status}, failing fast across all Groq models: ${lastErrorText}`,
+						`[Groq Provider] Fatal auth status ${res.status}, failing fast across all Groq models: ${lastErrorText}`,
 					);
 					throw new Error(
-						`Groq API fatal error (${res.status}): ${lastErrorText || "Authentication or model decommissioned failure"}`,
+						`Groq API fatal error (${res.status}): ${lastErrorText || "Authentication failure"}`,
 					);
+				}
+
+				// If model is decommissioned or not found, advance to the next candidate model
+				if (
+					res.status === 400 &&
+					(lastErrorText.includes("model_decommissioned") ||
+						lastErrorText.includes("decommissioned"))
+				) {
+					console.warn(
+						`[Groq Provider] Model ${model} is decommissioned, advancing to next candidate model...`,
+					);
+					continue;
 				}
 
 				console.warn(
@@ -502,11 +515,13 @@ async function analyzeWithGroq(
 // -----------------------------------------------------------------------------
 // 3. OpenRouter Free Models Provider
 // -----------------------------------------------------------------------------
-const OPENROUTER_CANDIDATE_MODELS = [
-	"minimax/minimax-m3:free",
+export const OPENROUTER_CANDIDATE_MODELS = [
+	"meta-llama/llama-3.2-11b-vision-instruct:free",
+	"google/gemini-2.0-flash-exp:free",
 	"google/gemma-4-26b-a4b-it:free",
 	"google/gemma-4-31b-it:free",
-	"nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+	"qwen/qwen-2.5-vl-72b-instruct:free",
+	"openrouter/free",
 ];
 
 async function analyzeWithOpenRouter(
@@ -559,14 +574,22 @@ async function analyzeWithOpenRouter(
 			if (!res.ok) {
 				lastErrorText = await res.text();
 
-				// Fail-fast on fatal auth or rate limit errors
-				if (res.status === 401 || res.status === 403 || res.status === 429) {
+				// Fail-fast ONLY on true auth credentials failure
+				if (res.status === 401 || res.status === 403) {
 					console.warn(
-						`[OpenRouter Provider] Fatal status ${res.status}, failing fast across all OpenRouter models: ${lastErrorText}`,
+						`[OpenRouter Provider] Fatal auth status ${res.status}, failing fast across all OpenRouter models: ${lastErrorText}`,
 					);
 					throw new Error(
-						`OpenRouter API fatal error (${res.status}): ${lastErrorText || "Authentication or rate limit failure"}`,
+						`OpenRouter API fatal error (${res.status}): ${lastErrorText || "Authentication failure"}`,
 					);
+				}
+
+				// Upstream shared pool rate limits (429) are model-specific: advance to next candidate model!
+				if (res.status === 429) {
+					console.warn(
+						`[OpenRouter Provider] Model ${model} upstream shared pool rate-limited (429), advancing to next candidate model...`,
+					);
+					continue;
 				}
 
 				console.warn(
