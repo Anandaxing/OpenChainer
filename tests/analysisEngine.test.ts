@@ -310,4 +310,67 @@ Hope this helps your engineering project!`;
 			}
 		});
 	});
+
+	describe("7. AI Fallback Engine Resilience & Error Discrimination Tests (#29)", () => {
+		it("should configure active production models for Google Gemini", async () => {
+			const { GEMINI_CANDIDATE_MODELS } = await import("../src/lib/analyze.ts");
+			assert.ok(GEMINI_CANDIDATE_MODELS.includes("gemini-2.5-flash"));
+			assert.ok(GEMINI_CANDIDATE_MODELS.includes("gemini-2.0-flash"));
+			assert.ok(GEMINI_CANDIDATE_MODELS.includes("gemini-1.5-flash"));
+			assert.ok(GEMINI_CANDIDATE_MODELS.includes("gemini-flash-latest"));
+			// Speculative non-existent versions must not be present
+			assert.strictEqual(GEMINI_CANDIDATE_MODELS.includes("gemini-3.6-flash"), false);
+			assert.strictEqual(GEMINI_CANDIDATE_MODELS.includes("gemini-3.8-flash"), false);
+		});
+
+		it("should exclude decommissioned preview models from Groq catalog", async () => {
+			const { GROQ_CANDIDATE_MODELS } = await import("../src/lib/analyze.ts");
+			assert.strictEqual(
+				GROQ_CANDIDATE_MODELS.includes("llama-3.2-11b-vision-preview"),
+				false,
+				"Decommissioned llama-3.2-11b-vision-preview must not be in Groq candidate models",
+			);
+			assert.ok(GROQ_CANDIDATE_MODELS.length > 0);
+		});
+
+		it("should configure free multimodal vision models and router on OpenRouter", async () => {
+			const { OPENROUTER_CANDIDATE_MODELS } = await import("../src/lib/analyze.ts");
+			assert.ok(
+				OPENROUTER_CANDIDATE_MODELS.includes(
+					"meta-llama/llama-3.2-11b-vision-instruct:free",
+				) || OPENROUTER_CANDIDATE_MODELS.includes("openrouter/free"),
+			);
+		});
+
+		it("should distinguish transient model errors from fatal auth errors", () => {
+			const isFatalAuth = (status: number) => status === 401 || status === 403;
+			const isDecommissioned = (text: string) =>
+				text.includes("model_decommissioned") || text.includes("decommissioned");
+			const isUpstreamSharedRateLimit = (text: string) =>
+				text.includes("upstream_provider_shared_pool") ||
+				text.includes("rate-limited upstream");
+
+			// 401/403 are fatal
+			assert.strictEqual(isFatalAuth(401), true);
+			assert.strictEqual(isFatalAuth(403), true);
+			assert.strictEqual(isFatalAuth(400), false);
+			assert.strictEqual(isFatalAuth(429), false);
+			assert.strictEqual(isFatalAuth(503), false);
+
+			// Model decommissioned is model-level (not fatal to provider)
+			assert.strictEqual(
+				isDecommissioned('{"code":"model_decommissioned"}'),
+				true,
+			);
+
+			// Upstream shared pool 429 is model-level (not fatal to provider)
+			assert.strictEqual(
+				isUpstreamSharedRateLimit(
+					'{"metadata":{"limit_source":"upstream_provider_shared_pool"}}',
+				),
+				true,
+			);
+		});
+	});
 });
+

@@ -235,11 +235,25 @@ function SinglePageApp() {
 			console.error("Analysis failed:", err);
 			setIsNonSchematicError(false);
 			setIsRateLimited(false);
-			setErrorMessage(
+
+			const rawMessage =
 				err instanceof Error
 					? err.message
-					: "Failed to analyze schematic image.",
-			);
+					: "Failed to analyze schematic image.";
+
+			// Friendly user-facing guidance when upstream AI providers are under global load
+			if (
+				rawMessage.includes("All AI Providers Failed") ||
+				rawMessage.includes("temporarily rate-limited upstream") ||
+				rawMessage.includes("experiencing high demand")
+			) {
+				setErrorMessage(
+					"AI vision providers are currently experiencing temporary high demand or upstream shared rate limits. Please wait 30–60 seconds and try re-analyzing.",
+				);
+			} else {
+				setErrorMessage(rawMessage);
+			}
+
 			setState("error");
 		}
 	};
