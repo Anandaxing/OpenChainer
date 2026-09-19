@@ -4,7 +4,7 @@
 
 # ⚡ OPENCHAINER
 
-v1.0.1 (latest release)
+v1.1.1 (latest release)
 Visit website: <a href="https://openchainer.vercel.app/" target="_blank">https://openchainer.vercel.app/</a>
 
 **An open-source, resilient AI tool for analyzing electrical schematics and circuit diagrams**
@@ -432,7 +432,14 @@ curl -X POST http://localhost:3000/api/analyze \
 ---
 
 ## 📦 Version History / Changelog
-- **v1.0.1** (Current)
+- **v1.1.1** (Current)
+  - **Deep Engineering Analysis**: Identified components now specify functional purpose, detailed point formation (node connections, ratings, roles), and critical failure risk.
+  - **Sequential Operational Cycle**: Deconstructed circuit operation into a 3–5 stage sequential cyclic flow with input/output states and closed-loop feedback representation.
+  - **Circuit Architecture Evaluation**: Automated dual-card comparison of engineering advantages vs. constraints/disadvantages.
+  - **Safety Hazard Detection**: High-visibility alerts for high-voltage AC mains shock, stored capacitor energy, and thermal runaway risks with actionable mitigations.
+  - **Multi-LLM Fallback Engine Resilience**: Updated Gemini, Groq, and OpenRouter model catalogs to active production releases with jittered backoff retry and intelligent error discrimination (decoupling model deprecations and upstream shared-pool 429 limits from fatal provider aborts).
+  - **Automated Unit Test Suite**: Expanded unit tests to 30 tests across 14 suites validating full schema normalization, backward compatibility, and multi-provider availability checks.
+- **v1.0.1**
   - **Automated 7-Day Database Cleaning**: Native PostgreSQL `pg_cron` scheduled job and authenticated `/api/cron/cleanup` endpoint to purge analysis cache records older than 7 days.
   - **Read-Time Cache TTL**: Enforced 7-day TTL cutoff in `POST /api/analyze` to avoid serving stale cached interpretations.
   - **Conflict-Safe Upsert**: Switched cache writes to `.upsert()` with `onConflict: "image_hash"` to eliminate write collisions on concurrent uploads.

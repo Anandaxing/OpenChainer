@@ -32,7 +32,7 @@ export const LandingHeader: React.FC = () => {
 								</span>
 							</span>
 							<span className="px-2 py-0.5 text-[10px] uppercase font-mono font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 rounded">
-								v1.0.1
+								v1.1.1
 							</span>
 						</div>
 					</div>
